@@ -1,0 +1,123 @@
+LOG seguimiento RUTINA formulas multiplicador precio de venta 2025-03-13 10:34:47 
+================================================================================= 
+Llegan parametros => factor: 6, grupo: P_PK, valor: 0.32 
+ REGISTRO: 0 VIENE: {"id_fact":"1","cod_grupo":"P_PK","valor":"0","mostrar":"1","fact_corto":"discn","formula":""}
+	 ARREGLO ar :{"discn":"0"}
+ REGISTRO: 1 VIENE: {"id_fact":"2","cod_grupo":"P_PK","valor":"0.480","mostrar":"1","fact_corto":"multi","formula":""}
+	 ARREGLO ar :{"discn":"0","multi":"0.480"}
+ REGISTRO: 2 VIENE: {"id_fact":"3","cod_grupo":"P_PK","valor":"0","mostrar":"1","fact_corto":"desct","formula":""}
+	 ARREGLO ar :{"discn":"0","multi":"0.480","desct":"0"}
+ REGISTRO: 3 VIENE: {"id_fact":"4","cod_grupo":"P_PK","valor":"1.20","mostrar":"1","fact_corto":"trans","formula":""}
+	 ARREGLO ar :{"discn":"0","multi":"0.480","desct":"0","trans":"1.20"}
+ REGISTRO: 4 VIENE: {"id_fact":"5","cod_grupo":"P_PK","valor":"0.576","mostrar":"0","fact_corto":"tcost","formula":"( multi * ( 1 - desct ) * trans )"}
+	 ARREGLO ar :{"discn":"0","multi":"0.480","desct":"0","trans":"1.20","tcost":"0.576"}
+
+ IF2 registro.mostrar == 0  
+		SEPARANDO: ( multi * ( 1 - desct ) * trans ) ARREGLO: ar : {"discn":"0","multi":"0.480","desct":"0","trans":"1.20","tcost":"0.576"}
+		EN SEPARA ARREGLO ar: {"discn":"0","multi":"0.480","desct":"0","trans":"1.20","tcost":"0.576"}
+		FORMULA: ( multi * ( 1 - desct ) * trans ) 
+		RESULTADO res = 0.576
+		Llevamos a registro.valor = 0.576  
+		EN arreglo ar:{"discn":"0","multi":"0.480","desct":"0","trans":"1.20","tcost":0.576}  
+		TRAEMOS a variable factorf = registro.id_fact y grupof = registro.cod_grupo  
+		en arreglo ardato:{"valor":0.576} 
+		MOD2: arreglo ardato en tabla multip : {"valor":0.576} ->  WHERE id_fact = '5' AND cod_grupo='P_PK'
+FIN DEL if2 
+ REGISTRO: 5 VIENE: {"id_fact":"6","cod_grupo":"P_PK","valor":"0.33","mostrar":"1","fact_corto":"grosm","formula":""}
+	 ARREGLO ar :{"discn":"0","multi":"0.480","desct":"0","trans":"1.20","tcost":0.576,"grosm":"0.33"}
+ABRIENDO if1 registro.id_fact = 6 y registro.cod_grupo = P_PK 
+		LLEVAMOS el valor enviado 0.32 al registro.valor 
+			en arreglo ar[ grosm ] = 0.32 
+			en arreglo ardato: {"valor":"0.32"} 
+		MOD pasando:{"valor":"0.32"} ->  WHERE id_fact = '6' AND cod_grupo='P_PK' 
+ FIN DEL if1 
+ REGISTRO: 6 VIENE: {"id_fact":"7","cod_grupo":"P_PK","valor":"0.86","mostrar":"0","fact_corto":"salem","formula":"( tcost \/ ( 1 - grosm ) )"}
+	 ARREGLO ar :{"discn":"0","multi":"0.480","desct":"0","trans":"1.20","tcost":0.576,"grosm":"0.32","salem":"0.86"}
+
+ IF2 registro.mostrar == 0  
+		SEPARANDO: ( tcost / ( 1 - grosm ) ) ARREGLO: ar : {"discn":"0","multi":"0.480","desct":"0","trans":"1.20","tcost":0.576,"grosm":"0.32","salem":"0.86"}
+		EN SEPARA ARREGLO ar: {"discn":"0","multi":"0.480","desct":"0","trans":"1.20","tcost":0.576,"grosm":"0.32","salem":"0.86"}
+		FORMULA: ( tcost / ( 1 - grosm ) ) 
+		RESULTADO res = 0.84705882352941
+		Llevamos a registro.valor = 0.847  
+		EN arreglo ar:{"discn":"0","multi":"0.480","desct":"0","trans":"1.20","tcost":0.576,"grosm":"0.32","salem":0.847}  
+		TRAEMOS a variable factorf = registro.id_fact y grupof = registro.cod_grupo  
+		en arreglo ardato:{"valor":0.847} 
+		MOD2: arreglo ardato en tabla multip : {"valor":0.847} ->  WHERE id_fact = '7' AND cod_grupo='P_PK'
+FIN DEL if2 
+ REGISTRO: 7 VIENE: {"id_fact":"8","cod_grupo":"P_PK","valor":"0.605","mostrar":"0","fact_corto":"engco","formula":"( tcost * 1.05 )"}
+	 ARREGLO ar :{"discn":"0","multi":"0.480","desct":"0","trans":"1.20","tcost":0.576,"grosm":"0.32","salem":0.847,"engco":"0.605"}
+
+ IF2 registro.mostrar == 0  
+		SEPARANDO: ( tcost * 1.05 ) ARREGLO: ar : {"discn":"0","multi":"0.480","desct":"0","trans":"1.20","tcost":0.576,"grosm":"0.32","salem":0.847,"engco":"0.605"}
+		EN SEPARA ARREGLO ar: {"discn":"0","multi":"0.480","desct":"0","trans":"1.20","tcost":0.576,"grosm":"0.32","salem":0.847,"engco":"0.605"}
+		FORMULA: ( tcost * 1.05 ) 
+		RESULTADO res = 0.6048
+		Llevamos a registro.valor = 0.605  
+		EN arreglo ar:{"discn":"0","multi":"0.480","desct":"0","trans":"1.20","tcost":0.576,"grosm":"0.32","salem":0.847,"engco":0.605}  
+		TRAEMOS a variable factorf = registro.id_fact y grupof = registro.cod_grupo  
+		en arreglo ardato:{"valor":0.605} 
+		MOD2: arreglo ardato en tabla multip : {"valor":0.605} ->  WHERE id_fact = '8' AND cod_grupo='P_PK'
+FIN DEL if2 
+EN ar_sale: {"datos":"VIENEN  factor: 6 grupo: P_PK valor: 0.32","estado":true,"grosm":"0.32"} 
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:save_cst_soporteria
+opcion:save_cst_soporteria
+opcion:save_cst_soporteria
+opcion:save_cst_soporteria
+opcion:save_cst_soporteria
+opcion:save_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:lee_cst_soporteria
+opcion:save_cst_soporteria
+opcion:save_cst_soporteria
+opcion:save_cst_soporteria
+opcion:save_cst_soporteria
