@@ -1,0 +1,46 @@
+
+body {
+    margin-left:10px;
+}  
+
+.marco_ppal{
+    width:90%;
+    margin-top: 10px;
+    margin-left:5px; 
+    background-color:rgb(150,201, 252);   /* rgb(171, 219, 37); */
+    padding:0.2em; 
+    border-radius:20px;
+}
+.marco_ppal H1{
+    font-weight: bold;
+
+}
+.marco_ppal H2{
+    text-decoration: underline;
+}
+
+.titulo_empresa{
+    background-color:#EEE;
+    font-size:1.8em;
+    text-align:center;
+    border-radius:13px;
+}
+
+.fondo_negro{
+    background-color: #256E8A;
+ }
+
+.letras_blancas{
+  color:#EEE;
+}
+
+.etiqueta {
+background-color:#EADEC2;
+  font-weight: bold;
+}
+
+#divresultado {
+    width:90%;
+    font-size:smaller;
+    display:none; 
+}

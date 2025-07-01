@@ -1,0 +1,6 @@
+.scrollable-div {
+    max-height: 400px; /* Altura máxima para mostrar barras de desplazamiento vertical */
+    overflow-y: scroll; /* Barra de desplazamiento vertical */
+    overflow-x: scroll; /* Barra de desplazamiento horizontal (si es necesario) */
+    white-space: nowrap; /* Para evitar que el texto se divida */
+}

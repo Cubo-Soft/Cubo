@@ -1,0 +1,1608 @@
+body{
+	margin-left:5pt;
+	font-size: 12px;
+}
+
+.encab {
+	font-weight:700;
+	font-size: 18px;
+	text-decoration:underline;
+	text-align:left;
+	border-top:none;
+	border-right:none;
+	border-bottom:none;
+	border-left: none;  /* .5pt solid #203764; */
+	margin-left: 12pt;
+}
+
+table {
+    /* border:'0.5px solid'; */
+	/* border: 0; */
+    border-spacing:0;
+    /* width:1261; */
+    border-collapse:collapse;
+    /* table-layout:fixed;  */
+    padding:0;
+}
+
+tr	{
+    height:auto;
+}
+
+td	{
+	padding:0px;
+	color:black;
+	font-size:10.0pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:Arial, sans-serif;
+	text-align:general;
+	vertical-align:bottom;
+	/* border:0.5px solid; */ 
+	/* border-color:#D9E1F2; */
+	white-space:nowrap;
+}
+col	{
+    width:auto;
+}
+
+.tabla2 {
+    border:1;
+    border-spacing:1;
+}
+
+.valor {
+	text-align:right;
+}
+
+.centro {
+	text-align:center;
+}
+
+/* .pers_adm {
+    display:none;
+}  */
+
+input[type="text"]:focus {
+    border-color: #007BFF;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+input:read-only {
+    background-color: #ccc; /* Color de fondo gris */
+}
+
+.costo_instal_tuberia input {
+	font-size:10px;
+	text-align: right;
+}
+
+.style20 {
+	color:#0563C1;
+	font-size:11.0pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:underline;
+	font-family:Arial, sans-serif;}
+a:link {
+	color:#0563C1;
+	font-size:11.0pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:underline;
+	font-family:Arial, sans-serif;
+}
+a:visited {
+	color:#954F72;
+	font-size:11.0pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:underline;
+	font-family:Arial, sans-serif;
+}
+.style0 {
+	text-align:general;
+	vertical-align:bottom;
+	white-space:nowrap;
+	color:black;
+	font-size:11.0pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:Arial, sans-serif;
+	border:none;
+}
+.style19 {
+	text-align:general;
+	vertical-align:bottom;
+	white-space:nowrap;
+	color:windowtext;
+	font-size:10.0pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"MS Sans Serif", sans-serif;
+	border:none;
+}
+.font9 {
+	color:#203764;
+	font-size:11.0pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:Arial, sans-serif;
+}
+.font11 {
+	color:black;
+	font-size:9.0pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:Tahoma, sans-serif;
+}
+.font21 {
+	color:#203764;
+	font-size:11.0pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:Arial, sans-serif;
+}
+.font24 {
+	color:#203764;
+	font-size:11.0pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:Arial, sans-serif;
+}
+.xl69 {
+	border:.5pt solid #203764;
+}
+.xl70 {
+	color:white;
+	font-weight:700;
+	text-align:center;
+	border:.5pt solid #203764;
+	background:#203764;
+}
+.xl71 {
+	color:white;
+	font-weight:700;
+	text-align:justify;
+	border-top:.5pt solid #203764;
+	border-right:.5pt solid #203764;
+	border-bottom:none;
+	border-left:.5pt solid #203764;
+	background:#336AD7; /*#203764;*/
+}
+.xl72 {
+	color:#203764;
+	border-top:none;
+	border-right:.5pt solid #203764;
+	border-bottom:.5pt solid #203764;
+	border-left:.5pt solid #203764;
+}
+.xl73 {
+	color:#203764;
+	border-top:none;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:.5pt solid #203764;}
+.xl74 {
+	color:#203764;
+	border-top:none;
+	border-right:.5pt solid #203764;
+	border-bottom:.5pt solid #203764;
+	border-left:.5pt solid #203764;}
+.xl75 {
+	color:#203764;
+	border-top:none;
+	border-right:.5pt solid #203764;
+	border-bottom:.5pt solid #203764;
+	border-left:.5pt solid #203764;}
+.xl76 {
+	color:#203764;
+	border-top:none;
+	border-right:.5pt solid #203764;
+	border-bottom:none;
+	border-left:.5pt solid #203764;}
+.xl77 {
+	color:#203764;
+	border-top:none;
+	border-right:none;
+	border-bottom:none;
+	border-left:.5pt solid #203764;}
+.xl78 {
+	color:#203764;
+	border-top:none;
+	border-right:.5pt solid #203764;
+	border-bottom:none;
+	border-left:.5pt solid #203764;}
+.xl79 {
+	color:#203764;
+	border-top:none;
+	border-right:.5pt solid #203764;
+	border-bottom:none;
+	border-left:.5pt solid #203764;}
+.xl80 {
+	color:#203764;
+	font-weight:700;
+	border-top:.5pt solid #203764;
+	border-right:.5pt solid #203764;
+	border-bottom:none;
+	border-left:.5pt solid #203764;}
+.xl81 {
+	color:#203764;
+	font-weight:700;
+	border-top:none;
+	border-right:.5pt solid #203764;
+	border-bottom:none;
+	border-left:.5pt solid #203764;}
+.xl82 {
+	color:#203764;
+	font-weight:700;
+	border-top:none;
+	border-right:none;
+	border-bottom:none;
+	border-left:.5pt solid #203764;}
+.xl83 {
+	color:#203764;
+	border:.5pt solid #203764;}
+.xl84 {
+	color:white;
+	font-weight:700;
+	text-align:center;
+	border-top:none;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:none;
+	background:#336AD7; /*#203764;*/
+}
+.xl85 {
+	color:#203764;
+	text-align:justify;
+	border:.5pt solid #203764;}
+.xl86 {
+	color:white;
+	font-weight:700;
+	background:#203764;
+}
+.xl87 {
+	color:#203764;
+	border:.5pt solid #203764;}
+.xl88 {
+	color:#203764;
+	border:.5pt solid #203764;
+	white-space:normal;}
+.xl89 {
+	color:white;
+	font-weight:700;
+	border:.5pt solid #203764;
+	background:#203764;
+}
+.xl90 {
+	color:white;
+	border:.5pt solid #203764;
+	background:#203764;
+}
+.xl91 {
+	font-weight:700;
+	border-top:none;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:none;
+	background:#203764;
+}
+.xl92 {
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:none;}
+.xl93 {
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:none;
+	border-left:none;}
+.xl94 {
+	color:white;
+	font-weight:700;
+	border-top:none;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:none;
+	background:#203764;
+}
+.xl95 {
+	color:#203764;
+	border-top:.5pt solid #203764;
+	border-right:.5pt solid #203764;
+	border-bottom:.5pt solid #203764;
+	border-left:none;}
+.xl96 {
+	color:#203764;
+	border-top:.5pt solid #203764;
+	border-right:.5pt solid #203764;
+	font-size:11.0pt;
+	font-weight:400;
+	border-bottom:.5pt solid #8EA9DB;
+	border-left:.5pt solid #203764;
+}
+.xl97 {
+	color:#203764;
+	border-top:.5pt solid #203764;
+	border-right:.5pt solid #203764;
+	border-bottom:none;
+	border-left:.5pt solid #203764;}
+.xl98 {
+	border-top:.5pt solid #203764;
+	border-right:.5pt solid #203764;
+	border-bottom:.5pt solid #203764;
+	border-left:none;}
+.xl99 {
+	color:white;
+	font-weight:700;
+	border-top:none;
+	border-right:.5pt solid #203764;
+	border-bottom:.5pt solid #203764;
+	border-left:none;
+	background:#203764;
+}
+.xl100 {
+	color:white;
+	font-weight:700;
+	border-top:none;
+	border-right:.5pt solid #203764;
+	border-bottom:.5pt solid #203764;
+	border-left:.5pt solid #203764;
+	background:#203764;
+}
+.xl101 {
+	color:white;
+	font-weight:700;
+	border-top:none;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:.5pt solid #203764;
+	background:#203764;
+}
+.xl102 {
+	font-size: 10pt;
+	border-top:.5pt solid #203764;
+	border-right:.5pt solid #203764;
+	border-bottom:none;
+	border-left:.5pt solid #203764;    /* none; */
+	padding: 0.5pt;
+}
+.xl103 {
+	border-top:none;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:none;
+	background:#203764;
+}
+.xl104 {
+	font-size:10.0pt;
+	border-top:none;
+	border-right:.5pt solid #203764;
+	border-bottom:.5pt solid #203764;
+	border-left:none;
+	background-color:#203764;
+	color:white;
+	font-weight:700;
+	border:.5pt solid #203764;
+}
+.xl105 {
+	border-top:none;
+	border-right:.5pt solid #203764;
+	border-bottom:.5pt solid #203764;
+	border-left:.5pt solid #203764;
+	background:#203764;
+}
+.xl106 {
+	border-top:none;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:.5pt solid #203764;
+	background:#203764;
+}
+.xl107 {
+	color:white;
+	font-weight:700;
+	border:.5pt solid #203764;
+	background:#548235;
+}
+.xl108 {
+	color:#203764;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:none;
+	border-left:.5pt solid #203764;
+}
+.xl109 {
+	color:#203764;
+	border:.5pt solid #203764;
+}
+.xl110 {
+	color:#203764;
+	border-top:.5pt solid #203764;
+	border-right:.5pt solid #203764;
+	border-bottom:none;
+	border-left:.5pt solid #203764;
+}
+.xl111 {
+	color:#203764;
+	border-top:none;
+	border-right:.5pt solid #203764;
+	border-bottom:none;
+	border-left:.5pt solid #203764;
+}
+.xl112 {
+	border:.5pt solid #203764;
+}
+.xl113 {
+	color:#203764;
+	text-align:justify;
+	border-top:.5pt solid #203764;
+	border-right:.5pt solid #203764;
+	border-bottom:.5pt solid #203764;
+	border-left:none;
+}
+.xl114 {
+	color:#203764;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:.5pt solid #203764;
+}
+.xl115 {
+	color:#203764;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:none;
+	border-left:.5pt solid #203764;
+}
+.xl116 {
+	color:#203764;
+	border:.5pt solid #203764;
+}
+.xl117 {
+	color:windowtext;
+	text-align:center;
+	border:.5pt solid windowtext;
+}
+.xl118 {
+	border-top:none;
+	border-right:.5pt solid #203764;
+	border-bottom:.5pt solid #203764;
+	border-left:.5pt solid #203764;
+}
+.xl119 {
+	border-top:.5pt solid #203764;
+	border-right:.5pt solid #203764;
+	border-bottom:none;
+	border-left:.5pt solid #203764;
+}
+.xl120 {
+	color:white;
+	font-weight:700;
+	border:.5pt solid #203764;
+	background:#BF8F00;
+}
+.xl121 {
+	color:#203764;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:none;
+}
+.xl122 {
+	color:#203764;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:none;
+	border-left:none;
+}
+.xl123 {
+	border:.5pt solid windowtext;
+}
+.xl124 {
+	border:.5pt solid #203764;
+}
+.xl125 {
+	color:#203764;
+	text-align:justify;
+}
+.xl126 {
+	color:white;
+	font-weight:700;
+	/* border-top:none;
+	border-right:.5pt solid #203764;
+	border-bottom:.5pt solid #203764;
+	border-left:.5pt solid #203764; */
+	background:#548235;
+	border-radius: 30%; 
+	overflow:hidden;
+}
+.xl127 {
+	color:white;
+	font-weight:700;
+	border-top:none;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:.5pt solid #203764;
+	background:#548235;
+}
+.xl128 {
+	background:#203764;
+}
+.xl129 {
+	border:.5pt solid #203764;
+	background:#203764;
+}
+.xl130 {
+	border:.5pt solid #203764;
+}
+.xl131 {
+	color:windowtext;
+	font-size:10.0pt;
+	text-align:center;
+	border:.5pt solid #203764;
+}
+.xl132 {
+	color:windowtext;
+	font-size:10.0pt;
+	border:.5pt solid #203764;
+}
+.xl134 {
+	color:windowtext;
+	font-size:10.0pt;
+	text-align:center;
+}
+.xl135 {
+	color:windowtext;
+	font-size:10.0pt;
+}
+.xl136 {
+	border-top:.5pt solid #203764;
+	border-right:.5pt solid #203764;
+	border-bottom:.5pt solid #203764;
+	border-left:none;
+	background:#D9E1F2;
+}
+.xl137 {
+	color:#203764;
+	border:.5pt solid #203764;
+}
+.xl138 {
+	color:#203764;
+}
+.xl139 {
+	color:white;
+	font-weight:700;
+	border-top:.5pt solid #203764;
+	border-right:.5pt solid #203764;
+	border-bottom:none;
+	border-left:none;
+	background:#203764;
+}
+.xl140 {
+	color:#203764;
+	border-top:.5pt solid #203764;
+	border-right:.5pt solid #203764;
+	border-bottom:none;
+	border-left:.5pt solid #203764;
+}
+.xl141 {
+	color:windowtext;
+	font-size:10.0pt;
+}
+.xl142 {
+	color:white;
+	font-size:10.0pt;
+	font-weight:700;
+	text-align:justify;
+	border:.5pt solid #203764;
+	background:#203764;
+}
+.xl143 {
+	color:windowtext;
+	font-size:10.0pt;
+	text-align:justify;
+}
+.xl144 {
+	color:#00B0F0;
+	font-size:10.0pt;
+	font-weight:700;
+	text-align:justify;
+}
+.xl145 {
+	color:red;
+	text-decoration:underline;
+	text-align:center;
+	vertical-align:middle;
+	border:1.0pt solid red;
+}
+.xl146 {
+	color:white;
+	font-weight:700;
+	text-align:center;
+}
+.xl147 {
+	color:#203764;	
+	text-align:justify;
+	border:.5pt solid #203764;
+}
+.xl148 {
+	color:#203764;
+	border-top:.5pt solid #203764;
+	border-right:.5pt solid #203764;
+	border-bottom:none;
+	border-left:.5pt solid #203764;
+}
+.xl149 {
+	color:#203764;
+	border:.5pt solid #203764;
+}
+.xl150 {
+	color:#203764;
+	font-weight:700;
+	text-decoration:underline;
+	border-top:none;
+	border-right:none;
+	border-bottom:none;
+	border-left:.5pt solid #203764;
+}
+.xl151 {
+	color:#203764;
+	border-top:none;
+	border-right:.5pt solid #203764;
+	border-bottom:none;
+	border-left:.5pt solid #203764;
+}
+.xl152 {
+	color:#203764;
+	font-weight:700;
+	text-decoration:underline;
+	text-align:justify;
+	border-top:none;
+	border-right:none;
+	border-bottom:none;
+	border-left:.5pt solid #203764;
+}
+.xl153 {
+	color:#203764;
+	font-weight:700;
+	text-decoration:underline;
+	text-align:left;
+	border-top:none;
+	border-right:none;
+	border-bottom:none;
+	border-left:.5pt solid #203764;
+}
+.xl154 {
+	color:#203764;
+	font-size:8.0pt;
+	text-align:center;
+	vertical-align:middle;
+}
+.xl155 {
+	border-top:.5pt solid #203764;
+	border-right:.5pt solid #203764;
+	border-bottom:none;
+	border-left:.5pt solid #203764; 
+}
+.xl156 {
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:.5pt solid #203764;
+}
+.xl157 {
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:none;
+	border-left:.5pt solid #203764;
+}
+.xl158 {
+	color:#203764;
+	font-weight:700;
+	border:.5pt solid #203764;
+}
+.xl159 {
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:none;
+	border-left:.5pt solid #203764;
+}
+.xl160 {
+	color:#203764;
+	font-weight:700;
+	text-align:justify;
+	border-top:.5pt solid #203764;
+	border-right:.5pt solid #203764;
+	border-bottom:.5pt solid #203764;
+	border-left:none;
+}
+.xl161 {
+	color:#203764;
+	font-weight:700;
+	border:.5pt solid #203764;
+}
+.xl162 {
+	color:#203764;
+	font-weight:700;
+	border:.5pt solid #203764;
+}
+.xl163 {
+	color:windowtext;
+	border-top:.5pt solid #203764;
+	border-right:.5pt solid #203764;
+	border-bottom:.5pt solid #203764;
+	border-left:none;
+}
+.xl164 {
+	color:windowtext;
+	border:.5pt solid #203764;
+}
+.xl165 {
+	color:windowtext;
+	border-top:.5pt solid #203764;
+	border-right:.5pt solid #203764;
+	border-bottom:none;
+	border-left:none;
+}
+.xl166 {
+	color:windowtext;
+	border-top:.5pt solid #203764;
+	border-right:.5pt solid #203764;
+	border-bottom:none;
+	border-left:.5pt solid #203764;
+}
+.xl167 {
+	color:windowtext;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:.5pt solid #203764;
+}
+.xl168 {
+	color:windowtext;
+	border-top:.5pt solid #203764;
+	border-right:.5pt solid #203764;
+	border-bottom:.5pt solid #203764;
+	border-left:none;
+	background:#D9E1F2;
+}
+.xl169 {
+	color:windowtext;
+	border-top:.5pt solid #203764;
+	border-right:.5pt solid #203764;
+	border-bottom:.5pt solid #203764;
+	border-left:none;
+	background:#D9E1F2;
+}
+.xl170 {
+	color:#203764;
+	border-top:none;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:none;
+}
+.xl171 {
+	color:windowtext;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:.5pt solid #203764;
+	background:#D9E1F2;
+}
+.xl172 {
+	color:windowtext;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:.5pt solid #203764;
+}
+.xl173 {
+	color:windowtext;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:none;
+	border-left:.5pt solid #203764;
+}
+.xl174 {
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:.5pt solid #203764;
+	background:#D9E1F2;
+}
+.xl175 {
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:.5pt solid #203764; 
+}
+.xl176 {
+	color:white;
+	border-top:none;
+	border-right:.5pt solid #203764;
+	border-bottom:.5pt solid #203764;
+	border-left:none;
+	background:#203764;
+}
+.xl177 {
+	color:white;
+	border-top:none;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:.5pt solid #203764;
+	background:#203764;
+}
+.xl178 {
+	border:.5pt solid #203764;
+	background:#BF8F00;
+	border-top:none;
+	border-left:none;
+	font-size:11.0pt;
+	color:white;
+	font-weight:700;
+	border:.5pt solid #203764;
+}
+.xl179 {
+	color:windowtext;
+	font-size:10.0pt;
+	text-align:center;
+	border:.5pt solid #203764;
+}
+.xl180 {
+	color:windowtext;	
+	text-align:justify;
+	vertical-align:middle;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:.5pt solid #203764;
+}
+.xl181 {
+	color:red;
+	text-decoration:underline;
+	text-align:center;
+	vertical-align:middle;
+}
+.xl182 {
+	text-align:justify;
+	border:.5pt solid #203764;
+}
+.xl183 {
+	color:windowtext;
+	font-size:10.0pt;
+	text-align:justify;
+	vertical-align:middle;
+	border:.5pt solid #203764;
+}
+.xl184 {
+	color:windowtext;
+	font-size:10.0pt;
+	text-align:justify;
+	border:.5pt solid #203764;
+}
+.xl185 {
+	color:white;
+	font-weight:700;	
+	border-top:none;
+	border-right:.5pt solid #203764;
+	border-bottom:.5pt solid #203764;
+	border-left:.5pt solid #203764;
+	background:#203764;
+}
+.xl186 {
+	color:#E7E6E6;
+	font-weight:700;
+	border:.5pt solid #203764;
+	background:#203764;
+}
+.xl187 {
+	color:white;
+	font-weight:700;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:.5pt solid #203764;
+	background:#203764;
+}
+.xl188 {
+	color:#203764;
+	text-align:center;
+	vertical-align:middle;
+	border:.5pt solid #203764;
+}
+.xl189 {
+	color:#203764;
+	border:.5pt solid #203764;
+}
+.xl190 {
+	color:#203764;
+	font-weight:700;
+	text-align:center;
+	vertical-align:middle;
+	border:.5pt solid #203764;
+}
+.xl191 {
+	color:white;
+	font-weight:700;
+	text-align:justify;
+	vertical-align:middle;
+	border:.5pt solid #203764;
+	background:#203764;
+}
+.xl192 {
+	color:white;
+	font-weight:700;
+	text-align:justify;
+	border:.5pt solid #203764;
+	background:#203764;
+}
+.xl193 {
+	color:#203764;
+	text-align:justify;
+	border:.5pt solid #203764;
+}
+.xl194 {
+	color:#203764;
+	text-align:justify;
+	border:.5pt solid #203764;
+}
+.xl195 {
+	color:windowtext;
+	text-align:justify;
+}
+.xl196 {
+	color:#00B0F0;
+	font-weight:700;
+	text-align:justify;
+}
+.xl197 {
+	color:windowtext;
+}
+.xl198 {
+	color:white;
+	font-weight:700;
+	background:#203764;
+}
+.xl199 {
+	color:#203764;
+	text-align:justify;
+	border:.5pt solid #203764; 
+}
+.xl202 {
+	color:#203764;
+	text-align:center;
+	border:.5pt solid #203764;
+}
+.xl203 {
+	color:#203764;
+	text-align:center;
+	vertical-align:middle;
+	border:.5pt solid #203764;
+}
+.xl204 {
+	color:#203764;
+}
+.xl205 {
+	color:#203764;	
+	border:.5pt solid windowtext;
+}
+.xl206 {
+	border:.5pt solid #203764;
+	background:#D9E1F2;
+}
+.xl207 {
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:none;
+	border-left:none;
+	background:#D9E1F2;
+}
+.xl208 {
+	color:#203764;
+	border-top:.5pt solid #203764;
+	border-right:.5pt solid #203764;
+	border-bottom:none;
+	border-left:.5pt solid #203764;
+}
+.xl211 {
+	color:windowtext;
+}
+.xl212 {
+	color:#203764;
+	text-align:justify;
+	border:.5pt solid #203764;
+}
+.xl213 {
+	color:#203764;
+	text-align:justify;
+}
+.xl214 {
+	color:#203764;
+	text-align:justify;
+	border-top:none;
+	border-right:.5pt solid #203764;
+	border-bottom:none;
+	border-left:none;
+}
+.xl215 {
+	color:#203764;
+	font-weight:700;
+	text-decoration:underline;
+	text-align:left;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:none;
+	border-left:.5pt solid #203764;
+}
+.xl216 {
+	color:#203764;
+	font-weight:700;
+	text-decoration:underline;
+	text-align:left;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:none;
+	border-left:none;
+}
+.xl217 {
+	color:#203764;
+	font-weight:700;
+	text-decoration:underline;
+	text-align:left;
+	border-top:.5pt solid #203764;
+	border-right:.5pt solid #203764;
+	border-bottom:none;
+	border-left:none;
+}
+.xl218 {
+	color:#203764;
+	text-align:justify;
+	border-top:none;
+	border-right:.5pt solid #203764;
+	border-bottom:none;
+	border-left:none;
+}
+.xl219 {
+	color:#203764;
+	text-align:justify;
+	border-top:none;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:none;
+}
+.xl220 {
+	color:#203764;
+	text-align:justify;
+	border-top:none;
+	border-right:.5pt solid #203764;
+	border-bottom:.5pt solid #203764;
+	border-left:none;
+}
+.xl221 {
+	color:white;
+	font-weight:700;
+	text-align:justify;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:none;
+	border-left:.5pt solid #203764;
+	background:#336AD7; /*#203764;*/
+}
+.xl222 {
+	color:white;
+	font-weight:700;
+	text-align:justify;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:none;
+	border-left:none;
+	background:#203764;
+}
+.xl223 {
+	color:white;
+	font-weight:700;
+	text-align:justify;
+	border-top:.5pt solid #203764;
+	border-right:.5pt solid #203764;
+	border-bottom:none;
+	border-left:none;
+	background:#203764;
+}
+.xl224 {
+	color:#203764;
+	font-weight:700;
+	text-decoration:underline;	
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:none;
+	border-left:.5pt solid #203764;
+}
+.xl225 {
+	color:#203764;
+	font-weight:700;
+	text-decoration:underline;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:none;
+	border-left:none;
+}
+.xl226 {
+	color:#203764;
+	font-weight:700;
+	text-decoration:underline;
+	border-top:.5pt solid #203764;
+	border-right:.5pt solid #203764;
+	border-bottom:none;
+	border-left:none;
+}
+.xl227 {
+    border-right:.5pt solid;
+    background-color:#336AD7; /* #2A58D7; */
+	color:white;
+	font-weight:700;
+	text-align:justify;
+}
+.xl228 {
+	color:white;
+	font-weight:700;
+	text-align:justify;
+	border-top:none;
+	border-right:.5pt solid #203764;
+	border-bottom:none;
+	border-left:none;
+	background:#203764;
+}
+.xl229 {
+	color:white;
+	font-weight:700;
+	text-align:justify;
+	border-top:none;
+	border-right:none;
+	border-bottom:none;
+	border-left:.5pt solid #203764;
+	background:#336AD7; /*#203764;*/
+}
+.xl230 {
+	color:#203764;
+	font-weight:700;
+	text-align:justify;
+	border-right:0.5pt solid;
+}
+.xl231 {
+	color:#203764;
+	font-weight:700;
+	text-align:justify;
+	border-top:none;
+	border-right:.5pt solid #203764;
+	border-bottom:none;
+	border-left:none;
+}
+.xl232 {
+	color:#203764;
+	font-weight:700;
+	text-decoration:underline;
+	text-align:justify;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:none;
+	border-left:.5pt solid #203764;
+}
+.xl233 {
+	color:#203764;
+	font-weight:700;
+	text-decoration:underline;
+	text-align:justify;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:none;
+	border-left:none;
+}
+.xl234 {
+	color:#203764;
+	font-weight:700;
+	text-decoration:underline;
+	text-align:justify;
+	border-top:.5pt solid #203764;
+	border-right:.5pt solid #203764;
+	border-bottom:none;
+	border-left:none;
+}
+.xl235 {
+	color:white;
+	font-weight:700;
+	text-align:center;
+	background:#203764;
+}
+.xl236 {
+	color:#203764;
+	text-align:justify;
+	vertical-align:middle;
+	border:.5pt solid #203764;
+}
+.xl237 {
+	color:#203764;
+	font-weight:700;
+	text-align:justify;
+	vertical-align:middle;
+	border:.5pt solid #203764;
+}
+.xl238 {
+	color:white;
+	font-weight:700;
+	text-align:center;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:.5pt solid #203764;
+	background:#203764;
+}
+.xl239 {
+	color:white;
+	font-weight:700;
+	text-align:center;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:none;
+	background:#203764;
+}
+.xl240 {
+	color:white;
+	font-weight:700;
+	text-align:center;
+	border-top:.5pt solid #203764;
+	border-right:.5pt solid #203764;
+	border-bottom:.5pt solid #203764;
+	border-left:none;
+	background:#203764;
+}
+.xl241 {
+	color:#203764;
+	font-weight:700;
+	text-align:justify;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:.5pt solid #203764;
+}
+.xl242 {
+	color:#203764;
+	font-weight:700;
+	text-align:justify;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:none;
+}
+.xl243 {
+	color:#203764;
+	text-align:justify;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:.5pt solid #203764;
+}
+.xl244 {
+	color:#203764;
+	text-align:justify;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:none;
+}
+.xl245 {
+	color:white;
+	font-weight:700;
+	text-align:justify;
+	border:.5pt solid #203764;
+	background:#203764;
+}
+.xl246 {
+	color:white;
+	font-weight:700;
+	text-align:center;
+	border:.5pt solid #203764;
+	background:#548235;
+}
+.xl247 {
+	color:white;
+	font-weight:700;
+	text-align:center;
+	border:.5pt solid #203764;
+	background:#BF8F00;
+}
+.xl248 {
+	color:#203764;
+	font-weight:700;
+	text-align:justify;
+	border:.5pt solid #203764;
+	white-space:normal;
+}
+.xl249 {
+	color:#203764;
+	text-align:justify;
+	border:.5pt solid #203764;
+	white-space:normal;
+}
+.xl250 {
+	color:#203764;
+	font-weight:700;
+	text-align:justify;
+	border:.5pt solid #203764;
+}
+.xl251 {
+	color:white;
+	font-weight:700;
+	text-align:center;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:.5pt solid #203764;
+	background:#BF8F00;
+}
+.xl252 {
+	color:white;
+	font-weight:700;
+	text-align:center;
+	border-top:.5pt solid #203764;
+	border-right:.5pt solid #203764;
+	border-bottom:.5pt solid #203764;
+	border-left:none;
+	background:#BF8F00;
+}
+.xl253 {
+	color:white;
+	font-weight:700;
+	text-align:center;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:none;
+	border-left:none;
+	background:#203764;
+}
+.xl254 {
+	color:white;
+	font-weight:700;
+	text-align:justify;
+	border-top:none;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:none;
+	background:#203764;
+}
+.xl255 {
+	text-align:justify;
+	border:.5pt solid #203764;
+}
+.xl256 {
+	text-align:justify;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:.5pt solid #203764;
+}
+.xl257 {
+	text-align:justify;
+	border-top:.5pt solid #203764;
+	border-right:.5pt solid #203764;
+	border-bottom:.5pt solid #203764;
+	border-left:none;
+}
+.xl258 {
+	color:white;
+	font-weight:700;
+	text-align:justify;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:.5pt solid #203764;
+	background:#203764;
+}
+.xl259 {
+	color:white;
+	font-weight:700;
+	text-align:justify;
+	border-top:.5pt solid #203764;
+	border-right:.5pt solid #203764;
+	border-bottom:.5pt solid #203764;
+	border-left:none;
+	background:#203764;
+}
+.xl260 {
+	color:windowtext;
+	font-size:10.0pt;
+	text-align:justify;
+	border:.5pt solid #203764;
+}
+.xl261 {
+	color:white;
+	font-weight:700;
+	text-align:center;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:.5pt solid #203764;
+	background:#548235;
+}
+.xl262 {
+	color:white;
+	font-weight:700;
+	text-align:center;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:none;
+	background:#548235;
+}
+.xl263 {
+	color:white;
+	font-weight:700;
+	text-align:center;
+	border-top:.5pt solid #203764;
+	border-right:.5pt solid #203764;
+	border-bottom:.5pt solid #203764;
+	border-left:none;
+	background:#548235;
+}
+.xl264 {
+	color:white;
+	font-weight:700;
+	text-align:center;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:none;
+	border-left:.5pt solid #203764;
+	background:#2F75B5;
+}
+.xl265 {
+	color:white;
+	font-weight:700;
+	text-align:center;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:none;
+	border-left:none;
+	background:#2F75B5;
+}
+.xl266 {
+	color:white;
+	font-weight:700;
+	text-align:center;
+	border-top:.5pt solid #203764;
+	border-right:.5pt solid #203764;
+	border-bottom:none;
+	border-left:none;
+	background:#2F75B5;
+}
+.xl267 {
+	color:white;
+	font-weight:700;
+	text-align:center;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:none;
+	border-left:.5pt solid #203764;
+	background:#BF8F00;
+}
+.xl268 {
+	color:white;
+	font-weight:700;
+	text-align:center;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:none;
+	border-left:none;
+	background:#BF8F00;
+}
+.xl269 {
+	color:white;
+	font-weight:700;
+	text-align:center;
+	border-top:.5pt solid #203764;
+	border-right:.5pt solid #203764;
+	border-bottom:none;
+	border-left:none;
+	background:#BF8F00;
+}
+.xl270 {
+	color:white;
+	font-weight:700;
+	text-align:center;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:.5pt solid #203764;
+	background:#7B7B7B;
+}
+.xl271 {
+	color:white;
+	font-weight:700;
+	text-align:center;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:none;
+	background:#7B7B7B;
+}
+.xl272 {
+	color:white;
+	font-weight:700;
+	text-align:center;
+	border-top:.5pt solid #203764;
+	border-right:.5pt solid #203764;
+	border-bottom:.5pt solid #203764;
+	border-left:none;
+	background:#7B7B7B;
+}
+.xl273 {
+	color:white;
+	font-weight:700;
+	text-align:center;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:.5pt solid #203764;
+	background:#C65911;
+}
+.xl274 {
+	color:white;
+	font-weight:700;
+	text-align:center;
+	border-top:.5pt solid #203764;
+	border-right:none;
+	border-bottom:.5pt solid #203764;
+	border-left:none;
+	background:#C65911;
+}
+.xl275 {
+	color:white;
+	font-weight:700;
+	text-align:center;
+	border-top:.5pt solid #203764;
+	border-right:.5pt solid #203764;
+	border-bottom:.5pt solid #203764;
+	border-left:none;
+	background:#C65911;
+}
+.xl276 {
+	color:white;
+	font-weight:700;
+	text-align:center;
+	border-top:none;
+	border-right:none;
+	border-bottom:none;
+	border-left:.5pt solid #203764;
+	background:#203764;
+}
+.xl277 {
+	color:white;
+	font-weight:700;
+	text-align:center;
+	border:.5pt solid #203764;
+	background:#7B7B7B; 
+}
+.xl278 {
+	color:white;
+	font-weight:700;
+	text-align:center;
+	border:.5pt solid #203764;
+	background:#2F75B5;
+}
+
+.fondo_azul {
+	/* color:white; */
+	font-weight:700;
+	text-align: right;
+	border:.5pt solid #203764;
+	/* background:#2F75B5; */
+	background: #EBF5FB;
+}

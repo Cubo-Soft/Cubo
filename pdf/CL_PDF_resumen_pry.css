@@ -1,0 +1,25 @@
+table {
+    border: 0.5pt solid black;
+    border-collapse: collapse;
+  }
+  th, td {
+    border: 0.5pt solid black;
+    padding: 5pt;
+  }
+  ul{
+    white-space: nowrap;
+  }
+  .valor {
+    text-align: right;
+  }
+  .xl85 {
+    color:#203764;
+    text-align:justify;
+    border:.5pt solid #203764;
+  }    
+  .xl227{
+    background-color:#336AD7; 
+    color:white;
+    font-weight:700;
+    text-align:justify;
+  }
