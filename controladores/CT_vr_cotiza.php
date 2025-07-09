@@ -1,5 +1,6 @@
 <?php
-
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
 session_start();
 
 include_once '../modelos/CL_vr_cotiza.php';
@@ -18,6 +19,8 @@ include_once '../modelos/CL_vm_clientesprov.php';
 include_once '../modelos/CL_vm_dsctos_especiales.php';
 include_once '../modelos/CL_vp_limites.php';
 include_once '../modelos/CL_nm_contactos.php';
+include_once '../cls/varios.php';  // ← Este es el que hace falta para la trm
+
 
 $OB_vr_cotiza = new CL_vr_cotiza();
 $OB_vr_cotizadet = new CL_vr_cotizadet();
@@ -34,9 +37,9 @@ $OB_nm_personas = new CL_nm_personas();
 $OB_vm_clientesprov = new CL_vm_clientesprov();
 $OB_vp_limites = new CL_vp_limites();
 $OB_vm_dsctos_especiales = new CL_vm_dsctos_especiales();
-$OB_nm_contactos= new CL_nm_contactos();
+$OB_nm_contactos = new CL_nm_contactos();
 
-if($_POST["caso"] === '1') {
+if ($_POST["caso"] === '1') {
 
     $datos["id_consecot"] = $_POST["datosAEnviar"]["id_consecot"];
     $id_consecot = $_POST["datosAEnviar"]["id_consecot"];
@@ -53,32 +56,69 @@ if($_POST["caso"] === '1') {
 
     $retorno["vr_cotizadet"] = $OB_vr_cotizadet->leer($datos, 1);
 
-    if(count($retorno["vr_cotizadet"])===0){
+    if (count($retorno["vr_cotizadet"]) === 0) {
 
         $datos["vr_cotizadet"] = $OB_vr_cotizadet->leer($datos, 5);
 
-        if($datos["vr_cotizadet"][0]["misional"]==='01'){
+        if ($datos["vr_cotizadet"][0]["misional"] === '01') {
             $retorno["vr_cotizadet"] = $OB_vr_cotizadet->leer($datos, 4);
-            $retorno["vr_cotizadet"][0]["alter_item"]=0;
+            $retorno["vr_cotizadet"][0]["alter_item"] = 0;
         }
     }
-    
+
     $retorno["caracteristicasRepuestos"] = array();
 
-    for($index = 0; $index < count($retorno["vr_cotizadet"]); $index++) {
+    for ($index = 0; $index < count($retorno["vr_cotizadet"]); $index++) {
 
-        $datos["alter_item"]=$retorno["vr_cotizadet"][$index]["alter_item"];
-        $retorno["precioDolares"][$index]=$OB_im_items->ejecutarPA($datos,1);
-        
-        if($retorno["vr_cotizadet"][$index]["cod_item"] !== '0' || $retorno["vr_cotizadet"][$index]["cod_item"] !== 'NULL') {
+        // === NUEVO BLOQUE para mostrar valores en USD y COP Diego B 07-07-2025===
+        // USD real: lo que ya tiene la cotización guardado
+        // ✅ Diego B: Consultar USD real desde procedimiento almacenado por cod_item y alter_item
+        $datos["cod_item"] = trim($retorno["vr_cotizadet"][$index]["cod_item"]);
+        $datos["alter_item"] = $retorno["vr_cotizadet"][$index]["alter_item"] ?? 0;
+
+
+        // ✅ Usa lo que ya está almacenado
+        $precioUSD = floatval($retorno["vr_cotizadet"][$index]["valor_unit_usd"] ?? 0);
+        $precioCOP = floatval($retorno["vr_cotizadet"][$index]["valor_unit_cop"] ?? 0);
+
+        // ✅ Si no existieran, podrías usar el procedimiento como fallback (opcional)
+        if ($precioUSD <= 0) {
+            $precioUSD = floatval($OB_im_items->ejecutarPA($datos, 1)); // solo si falla el valor guardado
+        }
+
+        $trm = lee_politrm();
+        $precioCOP = $precioCOP > 0 ? $precioCOP : round($precioUSD * $trm, 2);
+
+        $retorno["cm_trm"] = $trm;
+
+        $retorno["vr_cotizadet"][$index]["precio_vta_usd"] = $precioUSD;
+        $retorno["vr_cotizadet"][$index]["precio_vta"] = $precioCOP;
+        $retorno["vr_cotizadet"][$index]["valor_unit_usd"] = $precioUSD;
+        $retorno["vr_cotizadet"][$index]["valor_unit_cop"] = $precioCOP;
+        $retorno["precioDolares"][$index] = $precioUSD;
+
+
+        // 👁️ Este es el que se ve inicialmente
+        $retorno["precioDolares"][$index] = $precioCOP;
+
+        // Ajuste Diego B 03-07-2025: Valor USD real con fallback a cp_precios_provee por alter_item
+        // Asegura tener el cod_item antes de usar el caso 8 de CL_im_items
+        $datos["cod_item"] = trim($retorno["vr_cotizadet"][$index]["cod_item"]);
+
+
+        if ($retorno["vr_cotizadet"][$index]["cod_item"] !== '0' || $retorno["vr_cotizadet"][$index]["cod_item"] !== 'NULL') {
 
             $datos["cod_item"] = preg_replace('/\s+/', '', $retorno["vr_cotizadet"][$index]["cod_item"]);
             $retorno["caracteristicasRepuestos"][$index] = $OB_im_items->leer($datos, 15);
+            // ✅ Inyectar los valores reales para que el frontend los capture
+            $retorno["caracteristicasRepuestos"][$index][0]["precio_vta_usd"] = $retorno["vr_cotizadet"][$index]["valor_unit_usd"];
+            $retorno["caracteristicasRepuestos"][$index][0]["precio_vta"] = $retorno["vr_cotizadet"][$index]["valor_unit_cop"];
+
         } else {
             $retorno["caracteristicasRepuestos"][$index] = array();
         }
 
-        if($retorno["vr_cotizadet"][$index]["misional"] === '01' || $retorno["vr_cotizadet"][$index]["misional"] === '04') {
+        if ($retorno["vr_cotizadet"][$index]["misional"] === '01' || $retorno["vr_cotizadet"][$index]["misional"] === '04') {
             $datos["cod_grupo"] = $retorno["vr_cotizadet"][$index]["articulo"];
             $retorno["ip_grupos"][$index] = $OB_ip_grupos->leer($datos, 3);
 
@@ -98,13 +138,13 @@ if($_POST["caso"] === '1') {
         $datos["id_orden"] = $retorno["vr_cotizadet"][$index]["id_orden"];
         $retorno["vr_cotizcar"][$index] = $OB_vr_cotizcar->leer($datos, 1);
 
-        if(count($retorno["vr_cotizcar"][$index]) === 0) {
+        if (count($retorno["vr_cotizcar"][$index]) === 0) {
 
-            $retorno["textosCaracteristicas"][$index][0] = array();            
+            $retorno["textosCaracteristicas"][$index][0] = array();
 
         } else {
-                        
-            for($index1 = 0; $index1 < count($retorno["vr_cotizcar"][$index]); $index1++) {
+
+            for ($index1 = 0; $index1 < count($retorno["vr_cotizcar"][$index]); $index1++) {
 
                 $datos["codgrup"] = $retorno["vr_cotizadet"][$index]["articulo"];
                 $datos["codcarac"] = $retorno["vr_cotizcar"][$index][$index1]["caract"];
@@ -120,23 +160,23 @@ if($_POST["caso"] === '1') {
     $datos["numid"] = $data_nm_sucursal[0]["numid"];
     $retorno["nm_nits"] = $OB_nm_nits->leer($datos, 4);
 
-    if($retorno["nm_nits"][0]["idclase"] === 31) {
+    if ($retorno["nm_nits"][0]["idclase"] === 31) {
         $retorno["nm_juridicas"] = $OB_nm_juridicas->leer($datos, 5);
     }
 
-    if($retorno["nm_nits"][0]["idclase"] === 13) {
+    if ($retorno["nm_nits"][0]["idclase"] === 13) {
         $retorno["nm_personas"] = $OB_nm_personas->leer($datos, 1);
     }
 
-    if(count($retorno["nm_nits"]) === 0) {
+    if (count($retorno["nm_nits"]) === 0) {
         $datos["nit_cliente"] = $data_nm_sucursal[0]["numid"];
         $retorno["vm_clientesprov"] = $OB_vm_clientesprov->leer($datos, 1);
     }
-
     echo json_encode($retorno);
 }
 
-if($_POST["caso"] === '2') {
+
+if ($_POST["caso"] === '2') {
 
     $datos["termn_pago"] = $_POST["datosAEnviar"]["vp_termn_pago"];
     $datos["estado"] = $_POST["datosAEnviar"]["estado"];
@@ -145,15 +185,15 @@ if($_POST["caso"] === '2') {
     $datos["vigencia"] = $_POST["datosAEnviar"]["vigencia"];
     $datos["fecha_vence"] = $_POST["datosAEnviar"]["fecha_vence"];
     $datos["sem_entrega"] = $_POST["datosAEnviar"]["sem_entrega"];
-    $datos["id_contacto"]=intval($_POST["datosAEnviar"]["id_contacto"]);
-        
-    $data_nm_contactos=$OB_nm_contactos->leer($datos,5);
-    $datos["suc_cliente"]=$data_nm_contactos[0]["id_sucursal"];
+    $datos["id_contacto"] = intval($_POST["datosAEnviar"]["id_contacto"]);
+
+    $data_nm_contactos = $OB_nm_contactos->leer($datos, 5);
+    $datos["suc_cliente"] = $data_nm_contactos[0]["id_sucursal"];
 
     echo json_encode($OB_vr_cotiza->actualizar($datos, 1));
 }
 
-if($_POST["caso"] === '3') {
+if ($_POST["caso"] === '3') {
 
     $datos["fechaInicial"] = $_POST["datosAEnviar"]["fechaInicial"];
     $datos["fechaFinal"] = $_POST["datosAEnviar"]["fechaFinal"];
@@ -164,14 +204,14 @@ if($_POST["caso"] === '3') {
 
 }
 
-if($_POST["caso"] === '4') {
-    
+if ($_POST["caso"] === '4') {
+
     $datos["usuario"] = $_POST["datosAEnviar"]["usuario"];
     echo json_encode($OB_vr_cotiza->leer($datos, 3));
 
 }
 
-if($_POST["caso"] === '5') {
+if ($_POST["caso"] === '5') {
 
     $datos["id_consecot"] = $_POST["datosAEnviar"]["id_consecot"];
     $datos["descuento"] = $_POST["datosAEnviar"]["descuento"];

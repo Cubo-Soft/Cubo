@@ -693,7 +693,7 @@ function retornarIMItems2(data, opcion) {
             success: function (respuesta) {
                 var obj = JSON.parse(respuesta);
                 if (obj["im_items"].length > 0) {
-                    establecerValores(obj, 4);
+                    establecerValores(obj, 4);  // ← aquí se guarda respuestosCantidados Diego B 01-07-2025
                 } else {
                     retornarMensajeDeCreacion(2);
                 }
@@ -1003,8 +1003,6 @@ function retornarIMItems2(data, opcion) {
             }
         });
     }
-
-
 }
 
 function cambiarIMItems(data, opcion) {

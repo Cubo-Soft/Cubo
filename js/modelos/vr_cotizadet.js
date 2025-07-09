@@ -337,13 +337,15 @@ function crearVRCotizaDet(datos, opcion) {
             marca = respuestosCantidados["id_marca"];
         }
 
-        if(caracteristicasRepuestos.length===0){
-            caracteristicasRepuestos[0]=null;
+        if (caracteristicasRepuestos.length === 0) {
+            caracteristicasRepuestos[0] = null;
         }
 
-        if(arregloCaracteristicas.length===0){
-            arregloCaracteristicas[0]=null;
+        if (arregloCaracteristicas.length === 0) {
+            arregloCaracteristicas[0] = null;
         }
+
+        var idMoneda = $("#id_moneda").val(); // ← variable de moneda a usar Diego B 02-07-2025
 
         datosAEnviar = {
             'id_consecot': $("#id_consecot").val(),
@@ -359,12 +361,15 @@ function crearVRCotizaDet(datos, opcion) {
             'version': $("#version").val(),
             'descrip': respuestosCantidados.descrip,
             'iva': respuestosCantidados.iva,
-            'precio_vta': respuestosCantidados.precio_vta,
+            'precio_vta': (idMoneda === '35')
+                ? (respuestosCantidados.precio_vta_usd ?? respuestosCantidados.valor_unit_usd ?? 0)
+                : (respuestosCantidados.precio_vta ?? respuestosCantidados.valor_unit_cop ?? 0),
+            //⬅️ valor para usar usd
             'caracteristicasRepuestos': caracteristicasRepuestos,
             'arregloCaracteristicas': arregloCaracteristicas
         };
 
-         //esto es para cuando digitan el código del artículo/repuesto/item en cod_item en edit_requer.php 
+        //esto es para cuando digitan el código del artículo/repuesto/item en cod_item en edit_requer.php 
         //los datos enviados a CT_vr_requerimdet son de tipo arreglo
         //por eso el [$("#id").val()] al tomar el dato
         if (datosAEnviar.articulo.length === 0 && datosAEnviar.tipo === undefined && datosAEnviar.marca === "0") {

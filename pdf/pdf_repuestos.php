@@ -45,7 +45,7 @@ $data_ap_param = $OB_ap_param->leer(null, 1);
 $datos["id_consecot"] = $_GET["id_consecot"];
 $id_consecot = $_GET["id_consecot"];
 $retorno["vr_cotiza"] = $OB_vr_cotiza->leer($datos, 2);
-$data_vr_cotiza=$retorno["vr_cotiza"];
+$data_vr_cotiza = $retorno["vr_cotiza"];
 
 $datos["fecha"] = $retorno["vr_cotiza"][0]["fecha_ini"];
 
@@ -60,11 +60,35 @@ $retorno["nm_empleados"] = $OB_nm_empleados->leer($datos, 2);
 $datos["id_sucursal"] = $data_vr_cotiza[0]["suc_cliente"];
 
 $retorno["vr_cotizadet"] = $OB_vr_cotizadet->leer($datos, 3);
+//para cargar el dato de COP real en el pdf
+$trm = $retorno["cm_trm"]; // ya se obtiene con lee_politrm()
+
+for ($i = 0; $i < count($retorno["vr_cotizadet"]); $i++) {
+    $valorUSD = floatval($retorno["vr_cotizadet"][$i]["valor_unit"]);
+    $retorno["vr_cotizadet"][$i]["valor_unit_cop"] = round($valorUSD * $trm, 2);
+}
+
+// ✅ Ajuste Diego B 04-07-2025: usar directamente los valores ya almacenados en BD
+$trm = $retorno["cm_trm"]; // ← TRM ya obtenida del sistema
+
+for ($index = 0; $index < count($retorno["vr_cotizadet"]); $index++) {
+    // ✅ Asegurar valor USD y COP real ya almacenado (sin reconsultar im_items o cp_precios_provee)
+    $precioUSD = floatval($retorno["vr_cotizadet"][$index]["precio_vta_usd"] ?? 0);
+    $precioCOP = round($precioUSD * $trm, 2); // conversión por TRM actual del sistema
+
+    // ✅ Asignar donde CL_PDF lo espera
+    $retorno["caracteristicasRepuestos"][$index][0]["precio_vta_usd"] = $precioUSD;
+    $retorno["caracteristicasRepuestos"][$index][0]["precio_vta"] = $precioCOP;
+
+    // ✅ También asegurar IVA (si no existe)
+    $retorno["vr_cotizadet"][$index]["iva_referencia"] = $retorno["vr_cotizadet"][$index]["iva_referencia"] ?? 19.00;
+}
+//Fin ajuste
 
 $retorno["caracteristicasRepuestos"] = array();
 
-$indice=0;
-
+$indice = 0;
+//for para marcas y carcteristicas ajustado Diego Bm 07-07-2025
 for ($index = 0; $index < count($retorno["vr_cotizadet"]); $index++) {
 
     $datos["id_consecot"] = $retorno["vr_cotizadet"][$index]["id_consecot"];
@@ -75,6 +99,26 @@ for ($index = 0; $index < count($retorno["vr_cotizadet"]); $index++) {
 
         $datos["cod_item"] = preg_replace('/\s+/', '', $retorno["vr_cotizadet"][$index]["cod_item"]);
         $retorno["caracteristicasRepuestos"][$index] = $OB_im_items->leer($datos, 15);
+
+        // ajuste para Asegurar que los precios estén disponibles para el PDF Diego B 03-07-2025
+        $datosPrecio = [];
+        $datosPrecio["cod_item"] = trim($retorno["vr_cotizadet"][$index]["cod_item"]);
+        $precioData = $OB_im_items->leer($datosPrecio, 8);
+
+        if (isset($precioData[0])) {
+            // Cargar los valores directamente donde CL_PDF los espera USD y COP
+            $retorno["caracteristicasRepuestos"][$index][0]["precio_vta_usd"] = $precioData[0]["precio_vta_usd"];
+            $retorno["caracteristicasRepuestos"][$index][0]["precio_vta"] = $precioData[0]["precio_vta"];
+            // 🟡 Cargar IVA dinámico correctamente
+            $retorno["vr_cotizadet"][$index]["iva_referencia"] = $precioData[0]["iva"];
+        } else {
+            $retorno["caracteristicasRepuestos"][$index][0]["precio_vta_usd"] = 0;
+            $retorno["caracteristicasRepuestos"][$index][0]["precio_vta"] = 0;
+        }
+        // Asegurar que se traiga también el IVA (para columna IVA% en el PDF)
+        $retorno["vr_cotizadet"][$index]["iva_referencia"] = $precioData[0]["iva"] ?? 0;
+        //fin ajuste
+
     } else {
         $retorno["caracteristicasRepuestos"][$index] = array();
     }
@@ -99,7 +143,7 @@ for ($index = 0; $index < count($retorno["vr_cotizadet"]); $index++) {
 
         for ($index1 = 0; $index1 < count($retorno["vr_cotizcar"][$index]); $index1++) {
 
-            $indice=$index1;
+            $indice = $index1;
 
             $datos["codgrup"] = $retorno["vr_cotizadet"][$index]["articulo"];
             $datos["codcarac"] = $retorno["vr_cotizcar"][$index][$index1]["caract"];
@@ -175,6 +219,7 @@ $nombreCotizacion = "Re_CT_" . $retorno["vr_cotiza"][0]["nro_cot"] . "_" . $reto
 //verificar existencia de directorio
 $directorio = realpath('../cotizaciones');
 
+ob_clean(); // ← Esto evita el error del TCPDF por salida previa
 //guardar en ../cotizaciones
 $OB_cotizacion->Output($directorio . '/' . $nombreCotizacion . '.pdf', 'F');
 //mostrar en el navegador

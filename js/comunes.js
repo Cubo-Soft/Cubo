@@ -413,8 +413,8 @@ function retornarDataList(obj, nombres, nombreDataList) {
     var datalist = "<datalist id='" + nombreDataList + "'>";
     for (var i = 0, max = obj.length; i < max; i++) {
         datalist += "<option value='" + obj[i][nombres[1]] + "'>";
-        if( nombres.length == 3){
-            datalist += "( " +  obj[i][nombres[2]] + " ) </option>";
+        if (nombres.length == 3) {
+            datalist += "( " + obj[i][nombres[2]] + " ) </option>";
         }
     }
     datalist += "</datalist>";
@@ -494,7 +494,10 @@ function establecerValores(obj, opcion) {
         $("#num_parte").val(obj["im_items"][0]["num_parte"]);
         $("#estadoItem").val(obj["im_items"][0]["estado_item"]);
         $("#iva").val(obj["im_items"][0]["iva"]);
-        $("#precio_vta").val(obj["im_items"][0]["precio_vta"]);
+        $("#precio_vta").val(obj["im_items"][0]["precio_vta"]);// <- Aquí se asigna el original Diego B 01-07-2025
+        // 🔧 Ajuste para forzar uso de precio USD en frontend
+        respuestosCantidados = obj["im_items"][0];
+        respuestosCantidados.precio_vta = obj["im_items"][0]["precio_vta_usd"];  // ← Este es el override real
         $("#ip_modelos").val(obj["im_items"][0]["modelo"]);
         $("#ip_lineas").val(obj["im_items"][0]["linea"]);
         $("#peso").val(obj["im_items"][0]["peso"]);
@@ -1099,10 +1102,10 @@ function armarTablaProductosBorradores(data, data2, opcion) {
 
                 tabla += '<td><button class="btn btn-success" id="' + data["datosRepuesto"][i]["cod_item"] + '" title="Producto seleccionado" ><span class="fa fa-check"></span></button></td>';
 
-                $("#cod_item").val(data["datosRepuesto"][i]["cod_item"]);                
+                $("#cod_item").val(data["datosRepuesto"][i]["cod_item"]);
                 $("#alter_item").val(data["datosRepuesto"][i]["alter_item"]);
                 $("#nom_item").val(data["datosRepuesto"][i]["nom_item"]);
-                
+
                 if (parseInt(data["datosRepuesto"][i]["saldo"]) === 0) {
                     repuestosSinExistencia[i] = data["datosRepuesto"][i]["cod_item"];
                 } else {
@@ -1432,7 +1435,7 @@ function armarTablaProductos(data, opcion) {
         tabla += '<th>a Compras</th>';
     }
 
-    if($("#codprog").val() === 'toma_requer'){
+    if ($("#codprog").val() === 'toma_requer') {
         tabla += '<th>a Compras</th>';
     }
 
@@ -1481,7 +1484,16 @@ function armarTablaProductos(data, opcion) {
                 if (permisos.indexOf("P") !== -1) {
                     if (textosIniciales[i] !== null) {
                         tabla += '<td></td>';
-                        tabla += '<td>' + redondear(textosIniciales[i]["precio_vta"]) + '</td>';
+
+                        let mostrarPrecio = 0;
+
+                        if ($("#moneda").val() === '35') { // 35 = USD
+                            mostrarPrecio = redondear(textosIniciales[i]["precio_vta_usd"] ?? 0);
+                        } else {
+                            mostrarPrecio = redondear(textosIniciales[i]["precio_vta"] ?? 0);
+                        }
+
+                        tabla += '<td>' + mostrarPrecio + '</td>';
                     } else {
                         tabla += '<td></td>';
                         tabla += '<td></td>';
@@ -1584,16 +1596,26 @@ function armarTablaProductos(data, opcion) {
 
                     tabla += '<td><center>' + data["vr_requerimdet"][i]["saldo"] + '</center></td>';
 
-                    //permiso de precio de venta
+
+                    //permiso de precio de venta Diego B 07-07-2025
                     if (permisos.indexOf("P") !== -1) {
-                        tabla += '<td>' + redondear(data["repuestosConSaldo"][i][0]["precio_vta"]) + '</td>';
+                        let mostrarPrecio = 0;
+
+                        if (data["vr_cotiza"] && data["vr_cotiza"][0]["id_moneda"] === 35) {
+                            mostrarPrecio = redondear(data["repuestosConSaldo"][i][0]["precio_vta_usd"]);
+                        } else {
+                            mostrarPrecio = redondear(data["repuestosConSaldo"][i][0]["precio_vta"]);
+                        }
+
+                        tabla += '<td>' + mostrarPrecio + '</td>';
                     }
 
-                   tabla += '<td>' + data["vr_requerimdet"][i]["observs"] + '</td>';
+
+                    tabla += '<td>' + data["vr_requerimdet"][i]["observs"] + '</td>';
 
                     //determinar el tipo de importacion
                     tabla += '<td id="td_' + data["vr_requerimdet"][i]["id_reqdet"] + '">' + retornarCPTipoImportacion(data["vr_requerimdet"][i], 1) + '</td>';
-                    
+
                     //para compras                
                     if (data["vr_requerimdet"][i]["a_compras"] === 0) {
                         tabla += '<td><input type="checkbox" id="cr_' + data["vr_requerimdet"][i]["id_reqdet"] + '" name="re_' + data["vr_requerimdet"][i]["id_reqdet"] + '" title="Crear requerimiento para compras" onclick="cambiarVRRequerimDet(this.id, 1)" /></td>';
@@ -1660,10 +1682,20 @@ function armarTablaProductos(data, opcion) {
                     tabla += '<td><center><strong>' + data["vr_requerimdet"][i]["saldo"] + '</strong></center></td>';
                     //tabla += '<td>' + data["vr_requerimdet"][i]["minimo"] + '</td>';                    
 
-                    //permiso de precio de venta
+
+                    //permiso de precio de venta Diego B 07-07-2025
                     if (permisos.indexOf("P") !== -1) {
-                        tabla += '<td>' + redondear(data["repuestosSinSaldo"][i][0]["precio_vta"]) + '</td>';
+                        let mostrarPrecio = 0;
+
+                        if (data["vr_cotiza"] && data["vr_cotiza"][0]["id_moneda"] === 35) {
+                            mostrarPrecio = redondear(data["repuestosSinSaldo"][i][0]["precio_vta_usd"]);
+                        } else {
+                            mostrarPrecio = redondear(data["repuestosSinSaldo"][i][0]["precio_vta"]);
+                        }
+
+                        tabla += '<td>' + mostrarPrecio + '</td>';
                     }
+
 
                     tabla += '<td>' + data["vr_requerimdet"][i]["observs"] + '</td>';
 
@@ -1726,7 +1758,7 @@ function armarTablaProductos(data, opcion) {
 
                 //determinar el tipo de importacion
                 tabla += '<td id="' + datos["nombreTD"] + '">' + retornarCPTipoImportacion(data["vr_requerimdet"][i], 1) + '</td>';
-                
+
                 // //para compras                
                 if (data["vr_requerimdet"][i]["a_compras"] === 0) {
                     tabla += '<td><input type="checkbox" id="cr_' + data["vr_requerimdet"][i]["id_reqdet"] + '" name="re_' + data["vr_requerimdet"][i]["id_reqdet"] + '" title="Crear requerimiento para compras" onclick="cambiarVRRequerimDet(this.id, 1)" /></td>';
@@ -1824,9 +1856,9 @@ function armarTablaProductos(data, opcion) {
                     datos.cantidad = data["vr_cotizadet"][i]["cantidad"];
 
                     tabla += '<td><input type="number" value="' + retornarPrecioDolares(datos, 2) + '" style="border:none; text-align:left;" disabled /></td>';
-                    */                   
+                    */
 
-                    tabla += '<td><input type="number" value="' + data["precioDolares"][i] + '" style="border:none; text-align:left;" disabled /></td>';
+                    tabla += '<td><input type="number" value="' + data["vr_cotizadet"][i]["precio_vta_usd"] + '" style="border:none; text-align:left;" disabled /></td>';// Ajuste para mostrar modeda correctamente Diego B 03-07-2025
                 }
 
                 if (data["vr_cotiza"][0]["estado"] === 111) {
@@ -1839,57 +1871,51 @@ function armarTablaProductos(data, opcion) {
                     }
                 }
 
-                //evitar suma de los mismos valores durante el ciclo                
+                // 🛠️ Evitar suma de los mismos valores durante el ciclo   Diego B 07-07-2025             
+                let precioVenta = 0; // 👈 declarar antes del if
+
                 if (cod_items.indexOf(data["vr_cotizadet"][i]["id_orden"]) === -1) {
 
                     cod_items[i] = data["vr_cotizadet"][i]["id_orden"];
 
-                    datos.precioProducto = redondear(data["vr_cotizadet"][i]["valor_unit"]);
+                    let monedaActual = data["vr_cotiza"][0]["id_moneda"];
+                    let precioUnitario = 0;
 
+                    if (monedaActual === 35) {
+                        precioUnitario = parseFloat(data["vr_cotizadet"][i]["precio_vta_usd"]);
+                    } else {
+                        precioUnitario = parseFloat(data["vr_cotizadet"][i]["precio_vta"]);
+                    }
+
+                    datos.precioProducto = redondear(precioUnitario);
                     datos.iva = data["vr_cotizadet"][i]["iva_referencia"];
                     datos.trm = $("#trm").val();
-                    datos.cantidad = data["vr_cotizadet"][i]["cantidad"];
+                    datos.cantidad = parseFloat(data["vr_cotizadet"][i]["cantidad"]);
 
-                    $("#iva").val(data["vr_cotizadet"][i]["iva_referencia"]);
+                    $("#iva").val(datos.iva);
 
-                    //para el peso colombiano
-                    if (data["vr_cotiza"][0]["id_moneda"] === 34) {
-                        precioVenta = redondear(parseFloat(data["vr_cotizadet"][i]["valor_unit"]) * parseFloat(data["vr_cotizadet"][i]["cantidad"]));                        
-                    }
-
-                    //para el dolar
-                    if (data["vr_cotiza"][0]["id_moneda"] === 35) {
-                        precioVenta = parseFloat(data["precioDolares"][i]);
-                    }
+                    let cantidad = datos.cantidad;
+                    precioVenta = redondear(precioUnitario * cantidad);
 
                     if (parseFloat(data["vr_cotizadet"][i]["dscto_item"]) !== 0) {
                         valorDescuento = redondear((parseFloat(data["vr_cotizadet"][i]["dscto_item"]) * precioVenta) / 100);
                     } else {
                         valorDescuento = 0;
-                    }                    
+                    }
 
                     valorConDescuento = redondear(precioVenta) - redondear(valorDescuento);
-                    valorIva = (valorConDescuento * parseFloat(data["vr_cotizadet"][i]["iva_referencia"])) / 100;
+                    valorIva = (valorConDescuento * parseFloat(datos.iva)) / 100;
                     valorConIva = redondear(valorConDescuento) + redondear(valorIva);
-                    
+
                     subTotal += precioVenta;
                     totalDescuentos += valorDescuento;
                     valorBruto += valorConDescuento;
                     totalesIva += valorIva;
-
-                    
-
-                }
-                //para el peso colombiano
-                if (data["vr_cotiza"][0]["id_moneda"] === 34) {
-                    precioVenta = redondear(parseFloat(data["vr_cotizadet"][i]["valor_unit"]) * parseFloat(data["vr_cotizadet"][i]["cantidad"]));
-                    precioVenta=precioVenta.toFixed(2);
                 }
 
-                //para el dolar
-                if (data["vr_cotiza"][0]["id_moneda"] === 35) {
-                    precioVenta = data["precioDolares"][i];
-                }
+                // ✅ Solo dar formato visual final
+                precioVenta = precioVenta.toFixed(2);
+
 
                 tabla += '<td style="text-align: right;"><input type="number" value="' + data["vr_cotizadet"][i]["iva_referencia"] + '" style="width:60px; border:none" disabled /></td>';
 
@@ -2635,7 +2661,7 @@ function armarTablaMantenimientos(data, opcion) {
     }
 
     if (opcion === 2) {
-        
+
         for (let index = 0; index < data["equipos"].length; index++) {
 
             //tm = tipo_mantenimiento

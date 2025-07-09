@@ -45,9 +45,9 @@ $(document).ready(function () {
         'nombreDiv': 'divIPDtbasicos'
     };
     retornarIPDTBasicos(data, 2);
-    data = [];    
+    data = [];
     retornarNPCiudades(11001, 3);
-    
+
     data = {
         'nombreDiv': 'divSubZonas'
     };
@@ -95,28 +95,29 @@ $(document).ready(function () {
     }
     retornarVPVigencia(data, 1);
 
-    $("#cod_item").on("blur",function(){
-        retornarIMItems2(null,7);
+    $("#cod_item").on("blur", function () {
+        retornarIMItems2(null, 7);
     });
 
-    $("#alter_item").on("blur", function () {        
-        retornarIMItems2(null,9);
+    $("#alter_item").on("blur", function () {
+        retornarIMItems2(null, 9);
     });
 
     $("#nom_item").on("keypress", function () {
-        retornarIMItems2(null,10);
+        retornarIMItems2(null, 10);
     });
 
     $("#nom_item").on("blur", function () {
-        retornarIMItems2(null,11);
+        retornarIMItems2(null, 11);
     });
 
-    $("#cantidadRepuestos").blur(function(){
-        if(respuestosCantidados.saldo<=parseFloat($("#cantidadRepuestos").val())){
-            $("#btnLlamarPUBodegas").show();                    }
+    $("#cantidadRepuestos").blur(function () {
+        if (respuestosCantidados.saldo <= parseFloat($("#cantidadRepuestos").val())) {
+            $("#btnLlamarPUBodegas").show();
+        }
     });
 
-    $("#btnLlamarPUBodegas").click(function(){
+    $("#btnLlamarPUBodegas").click(function () {
         retornarIRSalinve(null, 2);
     });
 
@@ -295,12 +296,12 @@ $(document).ready(function () {
     });
 
     $("#btnGenerarPDFRepuestos").click(function () {
-        window.open("../pdf/pdf_repuestos.php?id_consecot=" + $("#id_consecot").val()),"_blank";
+        window.open("../pdf/pdf_repuestos.php?id_consecot=" + $("#id_consecot").val()), "_blank";
         window.location.reload("cotiza.php");
     });
 
     $("#btnEnviarPDFRepuestos").click(function () {
-        window.open("../pdf/enviar_cot_repuestos.php?id_consecot=" + $("#id_consecot").val(), "_self");        
+        window.open("../pdf/enviar_cot_repuestos.php?id_consecot=" + $("#id_consecot").val(), "_self");
     });
 
     if ($.urlParam('id_consecot') === null) {
@@ -344,5 +345,33 @@ $(document).ready(function () {
         retornarVRCotiza($.urlParam('id_consecot'), 1);
 
     }
+
+    /// Ajuste Diego B 03-07-2025: Cambio de moneda, actualiza el precio unitario visible
+    $(document).on("change", "#moneda", function () {
+        const idMoneda = $(this).val();
+
+        setTimeout(() => {
+            if (typeof respuestosCantidados === 'object' && respuestosCantidados !== null) {
+                const tieneUSD = respuestosCantidados.hasOwnProperty("precio_vta_usd");
+                const tieneCOP = respuestosCantidados.hasOwnProperty("precio_vta");
+
+                let nuevoPrecio = 0;
+
+                if (idMoneda === '35') {
+                    nuevoPrecio = tieneUSD ? respuestosCantidados.precio_vta_usd : 0;
+                } else {
+                    nuevoPrecio = tieneCOP ? respuestosCantidados.precio_vta : 0;
+                }
+
+                if ($("#precio_vta").length > 0) {
+                    $("#precio_vta").val(nuevoPrecio);
+                    console.log(`✅ Moneda cambiada a: ${idMoneda} → Nuevo precio: ${nuevoPrecio}`);
+                }
+            } else {
+                console.warn("❗ El objeto respuestosCantidados no está definido.");
+            }
+        }, 300);
+    });
+
 
 });

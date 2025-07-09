@@ -224,100 +224,97 @@ class CL_PDF extends TCPDF
             . '<th style="text-align: center; color:white"><strong>VALOR TOTAL ' . $datos["vr_cotiza"][0]["moneda"] . '</strong></th>'
             . '</tr>';
 
-        for ($i = 0; $i < count($datos["vr_cotizadet"]); $i++) {
-
-            if ($datos["vr_cotizadet"][$i]["misional"] === '02') {
-
-                for ($index = 0; $index < count($datos["caracteristicasRepuestos"]); $index++) {
-
-                    if ($datos["vr_cotizadet"][$index]["misional"] === "02") {
-
-                        //calculo de precios para los repuestos comparando por indice evitando no mostrar todos los items Diego 27-06-2025
-                        if (!isset($repuestos[$index])) {
-                            $repuestos[$index] = true;
-
-                            $contador++;
-
-                            $cantidad = floatval($datos["vr_cotizadet"][$index]["cantidad"]);
-                            $precioUnit = floatval($datos["caracteristicasRepuestos"][$index][0]["precio_vta"]);
-                            $dsctoPorcentaje = floatval($datos["vr_cotizadet"][$index]["dscto_item"]);
-                            $ivaPorcentaje = floatval($datos["vr_cotizadet"][$index]["iva_referencia"]);
-
-                            $subtotalProducto = $precioUnit * $cantidad;
-                            $valorDescuento = ($dsctoPorcentaje > 0) ? ($dsctoPorcentaje * $subtotalProducto) / 100 : 0;
-                            $valorConDescuento = $subtotalProducto - $valorDescuento;
-                            $valorIva = $valorConDescuento * $ivaPorcentaje / 100;
-                            $valorConIva = $valorConDescuento + $valorIva;
-
-                            // acumular totales
-                            $subTotal += $subtotalProducto;
-                            $totalDescuentos += $valorDescuento;
-                            $valorBruto += $valorConDescuento;
-                            $totalesIva += $valorIva;
-
-                            // Disponibilidad
-                            $textoDisponibilidad = ($datos["vr_cotizadet"][$index]["sem_dispo"] === 0)
-                                ? 'INMEDIATA'
-                                : $datos["vr_cotizadet"][$index]["sem_dispo"] . ' SEMANA(S)';
-                            if ($datos["vr_cotizadet"][$index]["sem_dispo"] > $maxSemanaEntrega) {
-                                $maxSemanaEntrega = $datos["vr_cotizadet"][$index]["sem_dispo"];
-                            }
-
-                            // Descuento textual
-                            $textoDescuento = number_format($dsctoPorcentaje, 2);
-
-                            // Descripción
-                            $nombreItem = $datos["vr_cotizadet"][$index]["descripcionArticulo"]
-                                ?? ($datos["caracteristicasRepuestos"][$index][0]["nom_item"] ?? '');
-                            //fin ajuste formulas
-
-                            //echo $datos["caracteristicasRepuestos"][$index][0]["nom_item"];
-
-                            $nombreItem = $datos["vr_cotizadet"][$index]["descripcionArticulo"]
-                                ?? ($datos["caracteristicasRepuestos"][$index][0]["nom_item"] ?? '');//linea para eviar warning Diego 26-06-2025
-
-                            $this->html .= '<tr>'
-                                . '<td border="1" style="font-size: 7px; text-align: center;">' . $contador . '</td>'
-                                . '<td border="1" style="font-size: 7px; text-align: center;"> ' . $datos["vr_cotizadet"][$index]["cantidad"] . '</td>'
-                                . '<td border="1" style="font-size: 7px; text-align: center;"> ' . $datos["vr_cotizadet"][$index]["cod_item"] . '</td>'
-                                . '<td border="1" style="font-size: 7px; text-align: left;"> ' . $nombreItem . '</td>' // línea corregida del warning 
-                                . '<td border="1" style="font-size: 7px; text-align: center;">' . $textoDisponibilidad . '</td>'
-                                . '<td border="1" style="font-size: 7px; text-align: center;"> ' . $datos["vr_cotizadet"][$index]["nom_marca"] . '</td>'
-                                . '<td border="1" style="font-size: 7px; text-align: right;"> ' . $textoDescuento . '</td>'
-                                . '<td border="1" style="font-size: 7px; text-align: right;"> ' . $datos["vr_cotizadet"][$index]["iva_referencia"] . '</td>'
-                                . '<td border="1" style="font-size: 7px; text-align: right;"> ' . number_format($precioUnit, 2) . '</td>';//cambio formulación nueva Diego 27-06-2025
-
-                            //para el dolar
-                            if ($datos["vr_cotiza"][0]["id_moneda"] === 35) {
-                                $this->html .= '<td border="1" style="font-size: 7px; text-align: right;"> ' . number_format($subtotalProducto, 2) . '</td>';
-
-                            } else {
-                                $this->html .= '<td border="1" style="font-size: 7px; text-align: right;"> ' . number_format($subtotalProducto, 2) . '</td>';
-
-                            }
-
-                            $this->html .= '</tr>';
-
-                            if (count($datos["vr_cotizcar"][$index]) > 0) {
-                                $this->html .= '<tr><td colspan="12" border="1" style="font-size: 7px;text-align: left;" ><div class="col-lg-12 bg-info"> Caracteristicas de: <strong>' . $datos["vr_cotizadet"][$index]["descripcionArticulo"] . '</strong> <br/>';
-                                for ($k = 0; $k < count($datos["textosCaracteristicas"][$index]); $k++) {
-                                    $this->html .= ' <strong>' . $datos["textosCaracteristicas"][$index][$k][0]["desccarac"] . ' :</strong> ';
-                                    $this->html .= ' ' . $datos["vr_cotizcar"][$index][$k]["vr_caract"] . '<br/>';
-                                }
-                                $this->html .= '</div></td></tr>';
-                            }
-
-                            // if (
-                            //     strlen($datos["vr_cotizadet"][$index]["observs"]) > 0 &&
-                            //     strpos($this->html, $datos["vr_cotizadet"][$index]["observs"]) === false
-                            // ) {
-                            //     $this->html .= '<tr><td colspan="12" border="1" style="font-size: 7px;text-align: left;" > Observaciones: ' . $datos["vr_cotizadet"][$index]["observs"] . '</td></tr>';
-                            // }
-                        }
-                    }
+        // 🔧 Función auxiliar para obtener el precio real desde caracteristicasRepuestos
+        function obtenerPrecioUSD($caracteristicas, $codItemBuscado)
+        {
+            foreach ($caracteristicas as $item) {
+                if (isset($item[0]["cod_item"]) && trim($item[0]["cod_item"]) === trim($codItemBuscado)) {
+                    return floatval($item[0]["precio_vta_usd"] ?? 0);
                 }
             }
+            return 0;
         }
+
+        $trm = floatval($datos["cm_trm"] ?? lee_politrm()); // Asegura la TRM desde datos o desde función
+
+        file_put_contents("debug_llega_a_pdf.txt", print_r($datos["vr_cotizadet"], true));
+
+        // nuevo ajuste for Diego B 07-07-2025
+        for ($index = 0; $index < count($datos["vr_cotizadet"]); $index++) {
+            if ($datos["vr_cotizadet"][$index]["misional"] === '02') {
+                $contador++;
+
+                $cantidad = floatval($datos["vr_cotizadet"][$index]["cantidad"]);
+                $codItemActual = $datos["vr_cotizadet"][$index]["cod_item"];
+
+                $trm = floatval($datos["cm_trm"] ?? lee_politrm());
+
+                $precioUSD = floatval($datos["vr_cotizadet"][$index]["valor_unit_usd"] ?? 0);
+                $precioCOP = floatval($datos["vr_cotizadet"][$index]["valor_unit_cop"] ?? 0);
+
+                if ($datos["vr_cotiza"][0]["id_moneda"] == 35) { // USD
+                    $precioUnit = $precioUSD > 0 ? $precioUSD : round($precioCOP / $trm, 2);
+                } else { // COP
+                    $precioUnit = $precioCOP > 0 ? $precioCOP : round($precioUSD * $trm, 2);
+                }
+
+                // 🧮 Cálculos
+                $dsctoPorcentaje = floatval($datos["vr_cotizadet"][$index]["dscto_item"] ?? 0);
+                $ivaPorcentaje = floatval($datos["vr_cotizadet"][$index]["iva_referencia"] ?? 19.00);
+
+                $subtotalProducto = $precioUnit * $cantidad;
+                $valorDescuento = ($dsctoPorcentaje > 0) ? ($dsctoPorcentaje * $subtotalProducto) / 100 : 0;
+                $valorConDescuento = $subtotalProducto - $valorDescuento;
+                $valorIva = $valorConDescuento * $ivaPorcentaje / 100;
+                $valorConIva = $valorConDescuento + $valorIva;
+
+                $subTotal += $valorConDescuento;
+                $totalDescuentos += $valorDescuento;
+                $valorBruto += $valorConDescuento;
+                $totalesIva += $valorIva;
+
+
+                // Disponibilidad
+                $textoDisponibilidad = ($datos["vr_cotizadet"][$index]["sem_dispo"] === 0)
+                    ? 'INMEDIATA'
+                    : $datos["vr_cotizadet"][$index]["sem_dispo"] . ' SEMANA(S)';
+
+                if ($datos["vr_cotizadet"][$index]["sem_dispo"] > $maxSemanaEntrega) {
+                    $maxSemanaEntrega = $datos["vr_cotizadet"][$index]["sem_dispo"];
+                }
+
+                $textoDescuento = number_format($dsctoPorcentaje, 2);
+
+                $nombreItem = $datos["vr_cotizadet"][$index]["descripcionArticulo"]
+                    ?? ($datos["caracteristicasRepuestos"][$index][0]["nom_item"] ?? '');
+
+                $this->html .= '<tr>'
+                    . '<td border="1" style="font-size: 7px; text-align: center;">' . $contador . '</td>'
+                    . '<td border="1" style="font-size: 7px; text-align: center;"> ' . $cantidad . '</td>'
+                    . '<td border="1" style="font-size: 7px; text-align: center;"> ' . $codItemActual . '</td>'
+                    . '<td border="1" style="font-size: 7px; text-align: left;"> ' . $nombreItem . '</td>'
+                    . '<td border="1" style="font-size: 7px; text-align: center;">' . $textoDisponibilidad . '</td>'
+                    . '<td border="1" style="font-size: 7px; text-align: center;"> ' . $datos["vr_cotizadet"][$index]["nom_marca"] . '</td>'
+                    . '<td border="1" style="font-size: 7px; text-align: right;"> ' . $textoDescuento . '</td>'
+                    . '<td border="1" style="font-size: 7px; text-align: right;"> ' . number_format($ivaPorcentaje, 2) . '</td>'//ajuste visual para dato correcto del iva Diego B 03-07-2025
+                    . '<td border="1" style="font-size: 7px; text-align: right;"> ' . number_format($precioUnit, 2) . '</td>'
+                    . '<td border="1" style="font-size: 7px; text-align: right;"> ' . number_format($valorConDescuento, 2) . '</td>'
+                    . '</tr>';
+
+                if (isset($datos["vr_cotizcar"][$index]) && count($datos["vr_cotizcar"][$index]) > 0) {
+                    $this->html .= '<tr><td colspan="12" border="1" style="font-size: 7px;text-align: left;" ><div class="col-lg-12 bg-info"> Caracteristicas de: <strong>' . $nombreItem . '</strong> <br/>';
+                    for ($k = 0; $k < count($datos["textosCaracteristicas"][$index]); $k++) {
+                        $this->html .= ' <strong>' . $datos["textosCaracteristicas"][$index][$k][0]["desccarac"] . ' :</strong> ';
+                        $this->html .= ' ' . $datos["vr_cotizcar"][$index][$k]["vr_caract"] . '<br/>';
+                    }
+                    $this->html .= '</div></td></tr>';
+                }
+            }
+
+        }
+
+        file_put_contents("debug_valores.txt", print_r($datos["vr_cotizadet"], true));
+
 
         //echo $totalesIva;       
 

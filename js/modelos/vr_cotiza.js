@@ -12,21 +12,36 @@ function retornarVRCotiza(datos, opcion) {
             type: "POST",
             success: function (respuesta) {
                 var obj = JSON.parse(respuesta);
+
+                console.log("🔍 Validación de datos backend a frontend");
+console.log("Moneda actual:", obj.vr_cotiza[0].id_moneda); // 34 = COP, 35 = USD
+let trmSistema = parseFloat($("#divValorTRM").text().replace("Cotizacion:", "").replace(/\s/g, ""));
+console.log("🟢 TRM desde vista:", trmSistema);
+// Validar primer repuesto
+if (obj.vr_cotizadet.length > 0) {
+    console.log("✏️ Primer repuesto:");
+    console.log("valor_unit_usd:", obj.vr_cotizadet[0].valor_unit_usd);
+    console.log("valor_unit_cop:", obj.vr_cotizadet[0].valor_unit_cop);
+    console.log("precio_vta_usd:", obj.vr_cotizadet[0].precio_vta_usd);
+    console.log("precio_vta:", obj.vr_cotizadet[0].precio_vta);
+    console.log("→ cod_item:", obj.vr_cotizadet[0].cod_item);
+    console.log("→ alter_item:", obj.vr_cotizadet[0].alter_item);
+}
                 suc_cliente = obj["vr_cotiza"][0]["suc_cliente"];
 
-                    if ($("#codprog").val() === 'cotiza') {                        
-                        $("#btnGenerarPDFRepuestos").show();
-                        $("#btnEnviarPDFRepuestos").show();
-                        $("#btnGenerarPDFEquipos").hide();
-                        $("#btnEnviarPDFEquipos").hide();
-                    }
+                if ($("#codprog").val() === 'cotiza') {
+                    $("#btnGenerarPDFRepuestos").show();
+                    $("#btnEnviarPDFRepuestos").show();
+                    $("#btnGenerarPDFEquipos").hide();
+                    $("#btnEnviarPDFEquipos").hide();
+                }
 
-                    if ($("#codprog").val() === 'cot_equipos') {
-                        $("#btnGenerarPDFEquipos").show();
-                        $("#btnEnviarPDFEquipos").show();
-                        $("#btnGenerarPDFRepuestos").hide();
-                        $("#btnEnviarPDFRepuestos").hide();
-                    }
+                if ($("#codprog").val() === 'cot_equipos') {
+                    $("#btnGenerarPDFEquipos").show();
+                    $("#btnEnviarPDFEquipos").show();
+                    $("#btnGenerarPDFRepuestos").hide();
+                    $("#btnEnviarPDFRepuestos").hide();
+                }
 
                 if (obj["vr_cotiza"][0]["estado"] === 111) {
                     $("#btnGuardarCotizacion").hide();
@@ -88,7 +103,6 @@ function retornarVRCotiza(datos, opcion) {
 
                 for (var i = 0; i < obj["vr_cotizadet"].length; i++) {
 
-                    //para los equipos
                     if (obj["vr_cotizadet"][i]["misional"] === '01' || obj["vr_cotizadet"][i]["misional"] === '04') {
                         $("#btnRevisarEquipos").show();
                     }
@@ -97,7 +111,7 @@ function retornarVRCotiza(datos, opcion) {
                         $("#btnRevisarRepuestos").show();
                     }
 
-                    //para los repuestos
+                    // Solo si es vista de repuestos
                     if ($("#codprog").val() === 'cotiza') {
                         if (obj["vr_cotizadet"][i]["misional"] === '02') {
                             var data = {
@@ -105,11 +119,40 @@ function retornarVRCotiza(datos, opcion) {
                                 'ip_grupos': obj["vr_cotizadet"][i]["misional"]
                             };
                             retornarIMItems(data, 15);
-                            armarTablaProductos(obj, 3);
+
+                            // ✅ Validar que venga correctamente la posición [0]
+                            if (
+                                obj.caracteristicasRepuestos[i] &&
+                                obj.caracteristicasRepuestos[i][0]
+                            ) {
+                                // Construimos el objeto
+                                respuestosCantidados = obj.caracteristicasRepuestos[i][0];
+
+                                // Reasignamos con lo que viene desde PHP ya convertido
+                                respuestosCantidados.precio_vta_usd = obj.vr_cotizadet[i].precio_vta_usd ?? 0;
+                                respuestosCantidados.precio_vta = obj.vr_cotizadet[i].precio_vta ?? 0;
+
+                                console.log("✅ CARGA RES[" + i + "] → USD:", respuestosCantidados.precio_vta_usd, "| COP:", respuestosCantidados.precio_vta);
+
+                                // Pintar la tabla
+                                armarTablaProductos(obj, 3);
+
+                                // Ajustar precio visible según moneda actual
+                                const monedaActual = $("#moneda").val();
+                                let nuevoPrecio = monedaActual === '35'
+                                    ? respuestosCantidados.precio_vta_usd
+                                    : respuestosCantidados.precio_vta;
+
+                                if ($("#precio_vta").length > 0) {
+                                    $("#precio_vta").val(nuevoPrecio);
+                                    console.log("💡 Precio ajustado por moneda:", nuevoPrecio);
+                                }
+                            } else {
+                                console.warn("❗ caracteristicasRepuestos[" + i + "] no tiene datos válidos.");
+                            }
                         }
                     }
 
-                    //para los equipos
                     if ($("#codprog").val() === 'cot_equipos') {
                         if (obj["vr_cotizadet"][i]["misional"] === '01' || obj["vr_cotizadet"][i]["misional"] === '04') {
                             $("#divEquiposFinales").show();
@@ -125,10 +168,10 @@ function retornarVRCotiza(datos, opcion) {
                 var data = [];
                 data = {
                     'nombreDiv': 'divLineasMisionales',
-                    'opcionSeleccionada':obj["vr_cotizadet"][0]["misional"]
+                    'opcionSeleccionada': obj["vr_cotizadet"][0]["misional"]
                 };
-                retornarIPGrupos(data, 2);   
-                
+                retornarIPGrupos(data, 2);
+
 
             },
             error: function (jqXHR, textStatus, errorThrown) {
@@ -150,14 +193,14 @@ function retornarVRCotiza(datos, opcion) {
         datosAEnviar.fechaFinal = $("#fecha_fin1").val();
         datosAEnviar.usuario = $("#am_usuarios1").val();
 
-        if(datosAEnviar.estado===undefined){            
+        if (datosAEnviar.estado === undefined) {
             datosAEnviar.estado = 110;
         }
 
-        if(datosAEnviar.usuario===undefined){            
+        if (datosAEnviar.usuario === undefined) {
             datosAEnviar.usuario = $("#codusr").val();
         }
-        
+
         $("#divTituloCotizaciones").hide();
 
         $.ajax({
@@ -194,12 +237,12 @@ function retornarVRCotiza(datos, opcion) {
                         tabla += '<td>' + obj[i]["ciudad"] + '</td>';
                         tabla += '<td>' + obj[i]["sucursal"] + '</td>';
 
-                        if(obj[i]["nombre_persona"]===null){
+                        if (obj[i]["nombre_persona"] === null) {
                             tabla += '<td>' + obj[i]["razon_social_empresa"] + '</td>';
-                        }else{
+                        } else {
                             tabla += '<td>' + obj[i]["nombre_persona"] + '</td>';
                         }
-                                                
+
                         tabla += '<td>' + obj[i]["nombreEstado"] + '</td>';
 
                         switch (obj[i]["misional"]) {
@@ -250,10 +293,10 @@ function retornarVRCotiza(datos, opcion) {
     }
 
     if (opcion === 3) {
-        
-        var datosAEnviar={};
 
-        datosAEnviar.usuario=$("#codusr").val();
+        var datosAEnviar = {};
+
+        datosAEnviar.usuario = $("#codusr").val();
 
         $.ajax({
             url: "../controladores/CT_vr_cotiza.php",
@@ -270,7 +313,7 @@ function retornarVRCotiza(datos, opcion) {
                 console.log("Respuesta del servidor:");
                 console.log(jqXHR.responseText);
                 alert("Error en function retornarVRCotiza(data, opcion=1) {...\nError desde el servidor. Por favor informe a soporte");
-            }     
+            }
         });
     }
 }

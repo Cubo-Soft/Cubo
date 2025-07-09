@@ -27,9 +27,9 @@ class CL_im_items
                 $this->sentencia = "SELECT ip_grupos.cod_grupo,UPPER(ip_grupos.nom_grupo) as nom_grupo "
                     . "FROM ip_grupos "
                     . "WHERE ip_grupos.cod_grupo LIKE '" . $datos["ip_grupos"] . "%' "
-                    . "AND ip_grupos.subdivide='N' "                    
+                    . "AND ip_grupos.subdivide='N' "
                     . "GROUP BY ip_grupos.cod_grupo "
-                    ."ORDER BY ip_grupos.nom_grupo ";
+                    . "ORDER BY ip_grupos.nom_grupo ";
                 //echo $this->sentencia;
                 //exit();
             }
@@ -118,15 +118,36 @@ class CL_im_items
                 //exit();
             }
 
+            // Ajuste Diego B 01-07-2025 - Valor USD real con fallback a cp_precios_provee por alter_item
             if ($opcion === 8) {
+                $this->sentencia = "SELECT * FROM im_items WHERE cod_item='" . $datos["cod_item"] . "'";
+                $OB_CL_Base = new CL_Base();
+                $resultado = $OB_CL_Base->leer($this->sentencia);
 
-                $this->sentencia = "select * "
-                    . "from im_items "
-                    . "where im_items.cod_item='" . $datos["cod_item"] . "';";
+                // Validar que exista resultado
+                if (isset($resultado[0])) {
+                    // Si el precio en USD está vacío o en 0, buscamos en cp_precios_provee usando alter_item
+                    if (floatval($resultado[0]['precio_vta_usd']) <= 0) {
+                        $alterItem = trim($resultado[0]["alter_item"]); // ← usar alter_item como ref_provee
 
-                //echo $this->sentencia;
-                //exit();
+                        $this->sentencia = "
+                            SELECT vr_provee AS precio_provee
+                            FROM cp_precios_provee
+                            WHERE ref_provee = '" . $alterItem . "'
+                            ORDER BY fecha_ultima DESC
+                            LIMIT 1";
+
+                        $precioAlterno = $OB_CL_Base->leer($this->sentencia);
+
+                        if (isset($precioAlterno[0]["precio_provee"])) {
+                            $resultado[0]['precio_vta_usd'] = $precioAlterno[0]["precio_provee"];
+                        }
+                    }
+                }
+
+                return $resultado;
             }
+            //Fin ajuste 
 
             if ($opcion === 9) {
 
@@ -240,7 +261,7 @@ class CL_im_items
                     . "WHERE im_items.cod_item LIKE '%" . $datos["cod_item"] . "%' "
                     . "AND im_items.grup_item LIKE '" . $datos["grup_item"] . "%' "
                     //. "AND linea='" . $datos["linea"] . "';";
-                     . ";";
+                    . ";";
                 //echo $this->sentencia; 
             }
 
@@ -253,7 +274,7 @@ class CL_im_items
                 $this->sentencia = IM_ITEMS2
                     . "WHERE im_items.alter_item LIKE '%" . $datos["alter_item"] . "%' "
                     . "AND im_items.grup_item LIKE '" . $datos["grup_item"] . "%' ";
-                    //. "AND linea='" . $datos["linea"] . "';";
+                //. "AND linea='" . $datos["linea"] . "';";
             }
 
             if ($opcion === 23) {
