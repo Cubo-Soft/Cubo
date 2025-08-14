@@ -14,19 +14,19 @@ function retornarVRCotiza(datos, opcion) {
                 var obj = JSON.parse(respuesta);
 
                 console.log("🔍 Validación de datos backend a frontend");
-console.log("Moneda actual:", obj.vr_cotiza[0].id_moneda); // 34 = COP, 35 = USD
-let trmSistema = parseFloat($("#divValorTRM").text().replace("Cotizacion:", "").replace(/\s/g, ""));
-console.log("🟢 TRM desde vista:", trmSistema);
-// Validar primer repuesto
-if (obj.vr_cotizadet.length > 0) {
-    console.log("✏️ Primer repuesto:");
-    console.log("valor_unit_usd:", obj.vr_cotizadet[0].valor_unit_usd);
-    console.log("valor_unit_cop:", obj.vr_cotizadet[0].valor_unit_cop);
-    console.log("precio_vta_usd:", obj.vr_cotizadet[0].precio_vta_usd);
-    console.log("precio_vta:", obj.vr_cotizadet[0].precio_vta);
-    console.log("→ cod_item:", obj.vr_cotizadet[0].cod_item);
-    console.log("→ alter_item:", obj.vr_cotizadet[0].alter_item);
-}
+                console.log("Moneda actual:", obj.vr_cotiza[0].id_moneda); // 34 = COP, 35 = USD
+                let trmSistema = parseFloat($("#divValorTRM").text().replace("Cotizacion:", "").replace(/\s/g, ""));
+                console.log("🟢 TRM desde vista:", trmSistema);
+                // Validar primer repuesto
+                if (obj.vr_cotizadet.length > 0) {
+                    console.log("✏️ Primer repuesto:");
+                    console.log("valor_unit_usd:", obj.vr_cotizadet[0].valor_unit_usd);
+                    console.log("valor_unit_cop:", obj.vr_cotizadet[0].valor_unit_cop);
+                    console.log("precio_vta_usd:", obj.vr_cotizadet[0].precio_vta_usd);
+                    console.log("precio_vta:", obj.vr_cotizadet[0].precio_vta);
+                    console.log("→ cod_item:", obj.vr_cotizadet[0].cod_item);
+                    console.log("→ alter_item:", obj.vr_cotizadet[0].alter_item);
+                }
                 suc_cliente = obj["vr_cotiza"][0]["suc_cliente"];
 
                 if ($("#codprog").val() === 'cotiza') {
@@ -129,8 +129,8 @@ if (obj.vr_cotizadet.length > 0) {
                                 respuestosCantidados = obj.caracteristicasRepuestos[i][0];
 
                                 // Reasignamos con lo que viene desde PHP ya convertido
-                                respuestosCantidados.precio_vta_usd = obj.vr_cotizadet[i].precio_vta_usd ?? 0;
-                                respuestosCantidados.precio_vta = obj.vr_cotizadet[i].precio_vta ?? 0;
+                                respuestosCantidados.valor_unit_usd = obj.vr_cotizadet[i].valor_unit_usd ?? 0;
+                                respuestosCantidados.valor_unit_cop = obj.vr_cotizadet[i].valor_unit_cop ?? 0;
 
                                 console.log("✅ CARGA RES[" + i + "] → USD:", respuestosCantidados.precio_vta_usd, "| COP:", respuestosCantidados.precio_vta);
 
@@ -140,8 +140,8 @@ if (obj.vr_cotizadet.length > 0) {
                                 // Ajustar precio visible según moneda actual
                                 const monedaActual = $("#moneda").val();
                                 let nuevoPrecio = monedaActual === '35'
-                                    ? respuestosCantidados.precio_vta_usd
-                                    : respuestosCantidados.precio_vta;
+                                    ? respuestosCantidados.valor_unit_usd
+                                    : respuestosCantidados.valor_unit_cop;
 
                                 if ($("#precio_vta").length > 0) {
                                     $("#precio_vta").val(nuevoPrecio);

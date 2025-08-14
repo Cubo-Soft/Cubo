@@ -117,7 +117,7 @@ function retornarVRRequerim(data, opcion) {
                         $("#divContactosGeneral").show();
                         retornarNMContactos(obj["vr_requerim"][0]["id_contacto"], 6);
                     }
-                
+
                     //para las personas
                     if (cliente["idclase"] === 13) {
                         $("#divPersonasGeneral").show();
@@ -125,12 +125,12 @@ function retornarVRRequerim(data, opcion) {
                         $("#divContactosGeneral").show();
                         retornarNMContactos(obj["vr_requerim"][0]["id_contacto"], 6);
                     }
-                
+
                 } else if (obj["vr_requerim"].length > 0) {
                     // Mostrar datos de cliente provisional
                     $("#divClientesProvisionales").show();
                     const clienteProv = obj["vr_requerim"][0];
-                    
+
                     $("#nit_cliente_cp").val(clienteProv["nit_cliente"]);
                     $("#nombre_cp").val(clienteProv["nom_cliente"]);
                     $("#direccion_cp").val(clienteProv["dir_cliente"]);
@@ -138,7 +138,7 @@ function retornarVRRequerim(data, opcion) {
                     $("#email_cp").val(clienteProv["correo_cliente"]);
                     $("#contacto_cp").val(clienteProv["nom_contacto"]);
                 }
-                
+
 
 
                 $("#textAreaObservaciones").val(obj["vr_requerim"][0]["observs"]);
@@ -158,7 +158,10 @@ function retornarVRRequerim(data, opcion) {
                     };
                     retornarIPGrupos(data, 2);
                 } else {
+                    //ajuste Diego B 01-08-2025 items Nuevos
                     var cantRep = 0;
+                    var cantRepReq = 0;
+                    var activarReqCompras = 0; // === ✅ Inicializar la variable ===
 
                     var data = {
                         ip_lineas: obj["vr_requerim"][0]["de_linea"],
@@ -178,10 +181,16 @@ function retornarVRRequerim(data, opcion) {
                                 activarReqCompras += 1;
                             }
 
-                            if (obj["vr_requerimdet"][i]["saldo"] !== null) {
-                                if (parseInt(obj["vr_requerimdet"][i]["saldo"]) > 0) {
-                                    cantRepReq += 1;
-                                }
+                            // === ✅ Obtener saldo seguro, con fallback a 0 === Diego B 08-08-2025
+                            var saldo = obj["vr_requerimdet"][i]["saldo"];
+                            if (saldo === null || saldo === undefined || isNaN(saldo)) {
+                                saldo = 0;
+                            } else {
+                                saldo = parseInt(saldo);
+                            }
+
+                            if (saldo > 0) {
+                                cantRepReq += 1;
                             }
                         }
 
@@ -212,12 +221,17 @@ function retornarVRRequerim(data, opcion) {
                         $("#solicitudACompras").show();
                     }
 
-                    //evalua si el permiso para enviar la solicitud a compras está activo
-                    if (permisos.indexOf("RQC") !== -1) {
-                        //si alguno de los registros de los repuestos necesita ser enviado a compras
-                        if (activarReqCompras > 0) {
-                            $("#solicitudACompras").show();
-                        }
+                    // === 🔧 HABILITAR BOTÓN "ENVIAR A COMPRAS" SI HAY ITEMS CON a_compras = 1 ===
+                    let debeIrACompras = false;
+
+                    if (obj["vr_requerimdet"] && Array.isArray(obj["vr_requerimdet"])) {
+                        debeIrACompras = obj["vr_requerimdet"].some(item => item.a_compras == 1);
+                    }
+
+                    if (permisos.indexOf("RQC") !== -1 && debeIrACompras) {
+                        $("#solicitudACompras").show().prop("disabled", false);
+                    } else {
+                        $("#solicitudACompras").hide();
                     }
 
                     //evalua si el permiso para crear la cotización por parte del perfil esta activo

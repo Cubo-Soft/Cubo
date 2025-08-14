@@ -361,10 +361,8 @@ function crearVRCotizaDet(datos, opcion) {
             'version': $("#version").val(),
             'descrip': respuestosCantidados.descrip,
             'iva': respuestosCantidados.iva,
-            'precio_vta': (idMoneda === '35')
-                ? (respuestosCantidados.precio_vta_usd ?? respuestosCantidados.valor_unit_usd ?? 0)
-                : (respuestosCantidados.precio_vta ?? respuestosCantidados.valor_unit_cop ?? 0),
-            //⬅️ valor para usar usd
+            'valor_unit_usd': respuestosCantidados.precio_vta_usd ?? respuestosCantidados.valor_unit_usd ?? 0, //⬅️ valor para usar usd
+            'valor_unit_cop': respuestosCantidados.valor_unit_cop ?? 0,
             'caracteristicasRepuestos': caracteristicasRepuestos,
             'arregloCaracteristicas': arregloCaracteristicas
         };

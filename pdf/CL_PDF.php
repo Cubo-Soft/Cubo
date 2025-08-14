@@ -229,15 +229,13 @@ class CL_PDF extends TCPDF
         {
             foreach ($caracteristicas as $item) {
                 if (isset($item[0]["cod_item"]) && trim($item[0]["cod_item"]) === trim($codItemBuscado)) {
-                    return floatval($item[0]["precio_vta_usd"] ?? 0);
+                    return floatval($item[0]["valor_unit_usd"] ?? 0);
                 }
             }
             return 0;
         }
 
         $trm = floatval($datos["cm_trm"] ?? lee_politrm()); // Asegura la TRM desde datos o desde función
-
-        file_put_contents("debug_llega_a_pdf.txt", print_r($datos["vr_cotizadet"], true));
 
         // nuevo ajuste for Diego B 07-07-2025
         for ($index = 0; $index < count($datos["vr_cotizadet"]); $index++) {
@@ -249,14 +247,11 @@ class CL_PDF extends TCPDF
 
                 $trm = floatval($datos["cm_trm"] ?? lee_politrm());
 
-                $precioUSD = floatval($datos["vr_cotizadet"][$index]["valor_unit_usd"] ?? 0);
-                $precioCOP = floatval($datos["vr_cotizadet"][$index]["valor_unit_cop"] ?? 0);
+                $carac = $datos["caracteristicasRepuestos"][$index][0] ?? [];
 
-                if ($datos["vr_cotiza"][0]["id_moneda"] == 35) { // USD
-                    $precioUnit = $precioUSD > 0 ? $precioUSD : round($precioCOP / $trm, 2);
-                } else { // COP
-                    $precioUnit = $precioCOP > 0 ? $precioCOP : round($precioUSD * $trm, 2);
-                }
+                $precioUnit = floatval($datos["vr_cotizadet"][$index]["valor_unit"] ?? 0);
+
+
 
                 // 🧮 Cálculos
                 $dsctoPorcentaje = floatval($datos["vr_cotizadet"][$index]["dscto_item"] ?? 0);
@@ -312,9 +307,6 @@ class CL_PDF extends TCPDF
             }
 
         }
-
-        file_put_contents("debug_valores.txt", print_r($datos["vr_cotizadet"], true));
-
 
         //echo $totalesIva;       
 

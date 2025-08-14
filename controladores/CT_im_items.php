@@ -1,5 +1,9 @@
 <?php
 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 include_once '../modelos/CL_im_items.php';
 include_once '../modelos/CL_ip_grupos.php';
 include_once '../modelos/CL_ir_resinve.php';
@@ -8,6 +12,8 @@ include_once '../modelos/CL_nm_nits.php';
 include_once '../modelos/CL_nm_juridicas.php';
 include_once '../modelos/CL_nm_personas.php';
 include_once '../modelos/CL_ap_camposx.php';
+include_once '../modelos/CL_cp_precios_provee.php';
+
 
 $OB_im_items = new CL_im_items();
 $OB_ip_grupos = new CL_ip_grupos();
@@ -18,9 +24,10 @@ $OB_nm_juridicas = new CL_nm_juridicas();
 $OB_nm_personas = new CL_nm_personas();
 $OB_ap_camposx = new CL_ap_camposx();
 
+
 if ($_POST["caso"] === '1') {
-    $datos["ip_lineas"] = $_POST["datosAEnviar"]["ip_lineas"];
-    $datos["ip_grupos"] = $_POST["datosAEnviar"]["ip_grupos"];
+    $datos["ip_lineas"] = $_POST["datosAEnviar"]["ip_lineas"] ?? '';
+    $datos["ip_grupos"] = $_POST["datosAEnviar"]["ip_grupos"] ?? '';
 
     //EQUIPOS
     //PROYECTOS
@@ -195,7 +202,7 @@ if ($_POST["caso"] === '14') {
         $datos["cod_item"] = $_POST["datosAEnviar"]["cod_item"][0];
     }
 
-    if($_POST["datosAEnviar"]["filtro"]==='0'){
+    if ($_POST["datosAEnviar"]["filtro"] === '0') {
         $datos["grup_item"] = $_POST["datosAEnviar"]["grup_item"];
         $datos["tipo_item"] = $_POST["datosAEnviar"]["id_tipos"];
         $datos["ip_lineas"] = $_POST["datosAEnviar"]["ip_lineas"];
@@ -416,7 +423,7 @@ if ($_POST["caso"] === "25") {
 }
 
 if ($_POST["caso"] === "26") {
-    $datos["alter_item"] = $_POST["datosAEnviar"]["alter_item"];    
+    $datos["alter_item"] = $_POST["datosAEnviar"]["alter_item"];
     echo json_encode($OB_im_items->leer($datos, 23));
 }
 
@@ -429,6 +436,153 @@ if ($_POST["caso"] === "27") {
 }
 
 if ($_POST["caso"] === "28") {
-    $datos["nom_item"] = $_POST["datosAEnviar"]["nom_item"];    
+    $datos["nom_item"] = $_POST["datosAEnviar"]["nom_item"];
     echo json_encode($OB_im_items->leer($datos, 25));
 }
+
+function obtenerPrimerIdSucursal($numid_prov)
+{
+    $mysqli = new mysqli("localhost", USER, PASSWORD, BD);
+    if ($mysqli->connect_error) {
+        return "0";
+    }
+
+    $sql = "SELECT id_sucursal FROM nm_sucursal WHERE numid = '$numid_prov' ORDER BY id_sucursal ASC LIMIT 1";
+    $res = $mysqli->query($sql);
+
+    if ($res && $row = $res->fetch_assoc()) {
+        return $row["id_sucursal"];
+    }
+
+    return "0";
+}
+
+// Diego B - 14-07-2025: Inserta repuesto desde cp_precios_provee si no existe en im_items
+if ($_POST["caso"] === "29") {
+    include_once '../modelos/CL_cp_precios_provee.php';
+    include_once '../modelos/CL_im_items.php';
+    include_once '../modelos/CL_nm_sucursal.php';
+    include_once '../modelos/CL_Base.php';
+    include_once '../modelos/CL_ir_resinve.php';
+
+    $OB_cp_precios = new CL_cp_precios_provee();
+    $OB_nm_sucursal = new CL_nm_sucursal();
+    $OB_im_items = new CL_im_items();
+    $OB_CL_Base = new CL_Base();
+    $OB_ir_resinve = new CL_ir_resinve();
+
+    $alter_item = $_POST["datosAEnviar"]["alter_item"] ?? '';
+
+    if (empty($alter_item)) {
+        echo json_encode([
+            "status" => "error",
+            "mensaje" => "Referencia vacía"
+        ]);
+        exit;
+    }
+
+    // 1. Buscar en cp_precios_provee
+    $datosBusqueda = ["ref_provee" => $alter_item];
+    $precios = $OB_cp_precios->leer($datosBusqueda, 1);
+
+    if (empty($precios) || (float) $precios[0]["vr_provee"] <= 0) {
+        echo json_encode([
+            "status" => "no_existe",
+            "mensaje" => "No encontrado en proveedores"
+        ]);
+        exit;
+    }
+
+    $precio = $precios[0];
+    $cod_item = "H" . $precio["ref_provee"];
+
+    // 2. Verificar si ya existe en im_items
+    $check = $OB_CL_Base->leer("SELECT cod_item FROM im_items WHERE cod_item='$cod_item' LIMIT 1");
+    if (empty($check)) {
+        // 3. Si no existe, insertar
+        $id_proveedor = obtenerPrimerIdSucursal($precio["numid_prov"]);
+        $id_marca = $precio["idmarca"] ?? 0;
+
+        $datosNuevo = [
+            "cod_item" => $cod_item,
+            "alter_item" => $precio["ref_provee"],
+            "nom_item" => $precio["descrip"],
+            "unidad" => "UND",
+            "grup_item" => "0200",
+            "id_proveedor" => (int) $id_proveedor,
+            "id_marca" => (int) $id_marca,
+            "unid_desgaste" => "N/A",
+            "cant_desgaste" => 0,
+            "facturable" => 1,
+            "area_item" => 22,
+            "articulo" => "N/A",
+            "tipo_item" => "N/A",
+            "num_parte" => "N/A",
+            "estado_item" => 30,
+            "iva" => 0,
+            "precio_vta" => 0,
+            "modelo" => "N/A",
+            "linea" => 0,
+            "peso" => "0",
+            "volumen" => "0",
+            "dimensiones" => "0",
+            "precio_vta_usd" => (float) $precio["vr_provee"],
+            "minimo" => 5,
+            "maximo" => 15,
+            "foto" => "../img_inve/sin_imagen.jpg"
+        ];
+
+        $OB_im_items->crear($datosNuevo, 1);
+    }
+
+    // 4. Recuperar info 
+    $itemData = $OB_im_items->leer(["cod_item" => $cod_item], 21);
+
+    // === 🔧 INICIALIZAMOS $itemData de forma segura ===
+    if (!empty($itemData) && is_array($itemData)) {
+        $itemData = $itemData[0]; // Tomamos el primer registro
+
+        // --- ✅ INYECCIÓN SEGURA DE CAMPOS NECESARIOS (sin causar errores) ---
+        // No accedemos a campos que no existen → evitamos "Undefined index"
+
+        $itemData['cod_grupo'] = $itemData['grup_item'] ?? '0200';    // ✅ grup_item sí existe
+        $itemData['id_tipo'] = 0;                                     // ✅ Fijo: no existe, pero lo necesitamos
+        $itemData['id_marca'] = $itemData['id_marca'] ?? 0;           // ✅ ya viene
+        $itemData['id_unidad'] = $itemData['id_unidad'] ?? null;      // ✅ si existe, lo usamos
+
+    } else {
+        // Si no se encontró, creamos un objeto básico
+        $itemData = [
+            'cod_item' => $cod_item,
+            'alter_item' => $alter_item,
+            'nom_item' => 'Repuesto genérico',
+            'grup_item' => '0200',
+            'cod_grupo' => '0200',
+            'id_tipo' => 0,
+            'id_marca' => 0,
+            'unidad' => 'UND',
+            'precio_vta' => '0.00',
+            'modelo' => 'N/A',
+            'dimensiones' => '0',
+            'foto' => '../img_inve/sin_imagen.jpg'
+        ];
+    }
+
+    // 5. Obtener saldos
+    $datos = ["cod_item" => $cod_item];
+    $ir_resinve = $OB_ir_resinve->leer($datos, 1);
+    if (!is_array($ir_resinve)) {
+        $ir_resinve = [];
+    }
+
+    // === ✅ RESPUESTA LIMPIA: sin errores mezclados ===
+    ob_clean(); // 🔥 Limpia cualquier salida previa (como notices)
+
+    echo json_encode([
+        "datosRepuesto" => [$itemData],
+        "ir_resinve" => $ir_resinve
+    ]);
+
+    exit;
+}
+

@@ -50,6 +50,7 @@ $data_vr_cotiza = $retorno["vr_cotiza"];
 $datos["fecha"] = $retorno["vr_cotiza"][0]["fecha_ini"];
 
 $retorno["cm_trm"] = lee_politrm();
+$trm = floatval($retorno["cm_trm"] ?? 1); // ✅ DEFINE AQUÍ el valor de TRM antes del uso
 
 $datos["dias"] = $retorno["vr_cotiza"][0]["vigencia"];
 $retorno["vp_vigencia"] = $OB_vp_vigencia->leer($datos, 2);
@@ -60,35 +61,70 @@ $retorno["nm_empleados"] = $OB_nm_empleados->leer($datos, 2);
 $datos["id_sucursal"] = $data_vr_cotiza[0]["suc_cliente"];
 
 $retorno["vr_cotizadet"] = $OB_vr_cotizadet->leer($datos, 3);
-//para cargar el dato de COP real en el pdf
-$trm = $retorno["cm_trm"]; // ya se obtiene con lee_politrm()
 
-for ($i = 0; $i < count($retorno["vr_cotizadet"]); $i++) {
-    $valorUSD = floatval($retorno["vr_cotizadet"][$i]["valor_unit"]);
-    $retorno["vr_cotizadet"][$i]["valor_unit_cop"] = round($valorUSD * $trm, 2);
+// ✅ Asegurar cálculo de precios USD/COP si no vienen cargados directamente (como sí lo hace CT_vr_cotiza.php)
+for ($index = 0; $index < count($retorno["vr_cotizadet"]); $index++) {
+    $codItem = trim($retorno["vr_cotizadet"][$index]["cod_item"]);
+    if ($codItem !== '0' && strtoupper($codItem) !== 'NULL' && $codItem !== '') {
+        $datos["cod_item"] = $codItem;
+
+        // Leer precio desde lógica de negocio (leer(..., 8))
+        $precioItem = $OB_im_items->leer($datos, 8);
+
+        if (isset($precioItem[0]["precio_vta_usd"])) {
+            $valorUSD = floatval($precioItem[0]["precio_vta_usd"]);
+            $valorCOP = round($valorUSD * $trm, 2);
+
+            // Guardar en cotizadet
+            $retorno["vr_cotizadet"][$index]["valor_unit_usd"] = $valorUSD;
+            $retorno["vr_cotizadet"][$index]["valor_unit_cop"] = $valorCOP;
+
+            // Selección según moneda
+            $retorno["vr_cotizadet"][$index]["valor_unit"] =
+                ($retorno["vr_cotiza"][0]["id_moneda"] == 35) ? $valorUSD : $valorCOP;
+
+            // Guardar también para que CL_PDF los vea
+            $retorno["caracteristicasRepuestos"][$index][0]["valor_unit_usd"] = $valorUSD;
+            $retorno["caracteristicasRepuestos"][$index][0]["valor_unit_cop"] = $valorCOP;
+            $retorno["caracteristicasRepuestos"][$index][0]["iva_referencia"] =
+                floatval($retorno["vr_cotizadet"][$index]["iva_referencia"] ?? 19.00);
+        }
+    }
 }
+
+// for ($i = 0; $i < count($retorno["vr_cotizadet"]); $i++) {
+//     $valorUSD = floatval($retorno["vr_cotizadet"][$i]["valor_unit_cop"]);
+//     $retorno["vr_cotizadet"][$i]["valor_unit_cop"] = round($valorUSD * $trm, 2);
+// }
 
 // ✅ Ajuste Diego B 04-07-2025: usar directamente los valores ya almacenados en BD
 $trm = $retorno["cm_trm"]; // ← TRM ya obtenida del sistema
 
 for ($index = 0; $index < count($retorno["vr_cotizadet"]); $index++) {
     // ✅ Asegurar valor USD y COP real ya almacenado (sin reconsultar im_items o cp_precios_provee)
-    $precioUSD = floatval($retorno["vr_cotizadet"][$index]["precio_vta_usd"] ?? 0);
+    $precioUSD = floatval($retorno["vr_cotizadet"][$index]["valor_unit_usd"] ?? 0);
     $precioCOP = round($precioUSD * $trm, 2); // conversión por TRM actual del sistema
 
     // ✅ Asignar donde CL_PDF lo espera
-    $retorno["caracteristicasRepuestos"][$index][0]["precio_vta_usd"] = $precioUSD;
-    $retorno["caracteristicasRepuestos"][$index][0]["precio_vta"] = $precioCOP;
+    $precioUSD = floatval($retorno["vr_cotizadet"][$index]["valor_unit_usd"] ?? 0);
+    $precioCOP = floatval($retorno["vr_cotizadet"][$index]["valor_unit_cop"] ?? 0);
 
     // ✅ También asegurar IVA (si no existe)
     $retorno["vr_cotizadet"][$index]["iva_referencia"] = $retorno["vr_cotizadet"][$index]["iva_referencia"] ?? 19.00;
+
+    if ($retorno["vr_cotiza"][0]["id_moneda"] == 35) { // USD
+        $retorno["vr_cotizadet"][$index]["valor_unit"] = $retorno["vr_cotizadet"][$index]["valor_unit_usd"];
+    } else {
+        $retorno["vr_cotizadet"][$index]["valor_unit"] = $retorno["vr_cotizadet"][$index]["valor_unit_cop"];
+    }
 }
+
 //Fin ajuste
 
 $retorno["caracteristicasRepuestos"] = array();
 
 $indice = 0;
-//for para marcas y carcteristicas ajustado Diego Bm 07-07-2025
+//for para marcas y carcteristicas ajustado Diego B 07-07-2025
 for ($index = 0; $index < count($retorno["vr_cotizadet"]); $index++) {
 
     $datos["id_consecot"] = $retorno["vr_cotizadet"][$index]["id_consecot"];
@@ -100,24 +136,39 @@ for ($index = 0; $index < count($retorno["vr_cotizadet"]); $index++) {
         $datos["cod_item"] = preg_replace('/\s+/', '', $retorno["vr_cotizadet"][$index]["cod_item"]);
         $retorno["caracteristicasRepuestos"][$index] = $OB_im_items->leer($datos, 15);
 
-        // ajuste para Asegurar que los precios estén disponibles para el PDF Diego B 03-07-2025
-        $datosPrecio = [];
-        $datosPrecio["cod_item"] = trim($retorno["vr_cotizadet"][$index]["cod_item"]);
-        $precioData = $OB_im_items->leer($datosPrecio, 8);
+        // ✅ 1. Leer valores desde cotizadet Diego B24-07-2025
+        $precioUSD = floatval($retorno["vr_cotizadet"][$index]["valor_unit_usd"] ?? 0);
+        $precioCOP = floatval($retorno["vr_cotizadet"][$index]["valor_unit_cop"] ?? 0);
 
-        if (isset($precioData[0])) {
-            // Cargar los valores directamente donde CL_PDF los espera USD y COP
-            $retorno["caracteristicasRepuestos"][$index][0]["precio_vta_usd"] = $precioData[0]["precio_vta_usd"];
-            $retorno["caracteristicasRepuestos"][$index][0]["precio_vta"] = $precioData[0]["precio_vta"];
-            // 🟡 Cargar IVA dinámico correctamente
-            $retorno["vr_cotizadet"][$index]["iva_referencia"] = $precioData[0]["iva"];
-        } else {
-            $retorno["caracteristicasRepuestos"][$index][0]["precio_vta_usd"] = 0;
-            $retorno["caracteristicasRepuestos"][$index][0]["precio_vta"] = 0;
+        // ✅ 2. Si USD viene en cero, intentar desde caracteristicas Diego B24-07-2025
+        if ($precioUSD === 0) {
+            $precioUSD = floatval($retorno["caracteristicasRepuestos"][$index][0]["precio_vta_usd"] ?? 0);
+            if ($precioUSD === 0) {
+                $precioUSD = floatval($retorno["caracteristicasRepuestos"][$index][0]["precio_vta"] ?? 0);
+            }
         }
-        // Asegurar que se traiga también el IVA (para columna IVA% en el PDF)
-        $retorno["vr_cotizadet"][$index]["iva_referencia"] = $precioData[0]["iva"] ?? 0;
-        //fin ajuste
+
+        $trm = floatval($retorno["cm_trm"] ?? 1); // ✅ Siempre definir antes de usar Diego B24-07-2025
+
+        // ✅ 3. Siempre forzar el cálculo del COP con TRM
+        $precioCOP = round($precioUSD * $trm, 2);
+
+        // ✅ 4. Guardar precios corregidos en cotizadet y caracteristicas Diego B24-07-2025
+        $retorno["vr_cotizadet"][$index]["valor_unit_usd"] = $precioUSD;
+        $retorno["vr_cotizadet"][$index]["valor_unit_cop"] = $precioCOP;
+
+        $retorno["caracteristicasRepuestos"][$index][0]["valor_unit_usd"] = $precioUSD;
+        $retorno["caracteristicasRepuestos"][$index][0]["valor_unit_cop"] = $precioCOP;
+        $retorno["caracteristicasRepuestos"][$index][0]["iva"] =
+            $retorno["vr_cotizadet"][$index]["iva_referencia"] ?? 0;
+
+        // ✅ 5. Asignar valor_unit según moneda seleccionada Diego B24-07-2025
+        $retorno["vr_cotizadet"][$index]["valor_unit"] =
+            ($retorno["vr_cotiza"][0]["id_moneda"] == 35) ? $precioUSD : $precioCOP;
+
+        // ✅ 6. Asegurar que el IVA esté también reflejado en vr_cotizadet Diego B24-07-2025
+        $retorno["vr_cotizadet"][$index]["iva_referencia"] =
+            $retorno["caracteristicasRepuestos"][$index][0]["iva"];
 
     } else {
         $retorno["caracteristicasRepuestos"][$index] = array();
@@ -133,28 +184,21 @@ for ($index = 0; $index < count($retorno["vr_cotizadet"]); $index++) {
         $datos["id_marca"] = $retorno["vr_cotizadet"][$index]["marca"];
         $retorno["ip_marcas"][$index] = $OB_ip_marcas->leer($datos, 2);
     } else {
-
         $retorno["ip_grupos"][$index] = array();
         $retorno["ip_tipos"][$index] = array();
         $retorno["ip_marcas"][$index] = array();
     }
 
     if (count($retorno["vr_cotizcar"][$index]) > 0) {
-
         for ($index1 = 0; $index1 < count($retorno["vr_cotizcar"][$index]); $index1++) {
-
             $indice = $index1;
-
             $datos["codgrup"] = $retorno["vr_cotizadet"][$index]["articulo"];
             $datos["codcarac"] = $retorno["vr_cotizcar"][$index][$index1]["caract"];
-
             $retorno["textosCaracteristicas"][$index][$index1] = $OB_ir_caracte->leer($datos, 2);
         }
     } else {
-
         $retorno["textosCaracteristicas"][$index][$indice] = array();
     }
-
 }
 
 $data_nm_sucursal = $OB_nm_sucursal->leer($datos, 2);

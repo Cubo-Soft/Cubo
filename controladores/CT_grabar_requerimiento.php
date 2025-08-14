@@ -146,7 +146,7 @@ try {
 
     // Evitar warning si no viene vp_asesor_zona
     $asesorZona = isset($datosRecibidos["vp_asesor_zona"]) ? $datosRecibidos["vp_asesor_zona"] : null;
-    
+
     //nuevo ajuste para guardado correcto de datos en vr_requerim Daniel2025 
     if ($asesorZona === '-1' || is_null($asesorZona)) {
         // Sin asesor asignado
@@ -217,39 +217,79 @@ try {
 
     if (!isset($datosRecibidos["mantenimientoARealizar"])) {
 
-        //para los repuestos       
-        if (isset($datosRecibidos["textosIniciales"]) && count($datosRecibidos["textosIniciales"]) > 0) {
+// === 🔧 PARA LOS REPUESTOS (CORREGIDO) === Diego B 31-07-2025
+if (isset($datosRecibidos["textosIniciales"]) && count($datosRecibidos["textosIniciales"]) > 0) {
+    for ($index = 0; $index < count($datosRecibidos["textosIniciales"]); $index++) {
+        $item = $datosRecibidos["textosIniciales"][$index];
 
-            for ($index = 0; $index < count($datosRecibidos["textosIniciales"]); $index++) {
+        // === 🔁 Extraer cod_item del objeto o array ===
+        if (is_array($item)) {
+            // Si es un objeto asociativo, busca 'cod_item'
+            $cod_item = $item['cod_item'] ?? ($item[0] ?? '');
+        } else {
+            // Si es un string, úsalo directo
+            $cod_item = $item;
+        }
 
-                if (count($datosRecibidos["textosIniciales"][$index]) > 1) {
+        if (empty($cod_item)) {
+            continue; // Salta si no hay cod_item
+        }
 
-                    if ($datosRecibidos["textosIniciales"][$index]["cod_item"] !== '0') {
-                        $sentencia = "insert into vr_requerimdet (id_reqdet,id_requerim,linea,misional,articulo,tipo,marca,cod_item,cantidad,observs,a_compras,modo_import) "
-                            . "values (null," . $id_requerim . ",'" . $datosRecibidos["de_linea"] . "','02','" . $datosRecibidos["textosIniciales"][$index]["cod_grupo"] . "'," . $datosRecibidos["textosIniciales"][$index]["id_tipo"] . "," . $datosRecibidos["textosIniciales"][$index]["id_marca"] . ",'" . $datosRecibidos["textosIniciales"][$index]["cod_item"] . "','" . $datosRecibidos["cantidadesIniciales"][$index] . "','" . $datosRecibidos["notasIniciales"][$index] . "'," . $datosRecibidos["aCompras"][$index] . ",1);";
-                        //echo $sentencia;
-                        $preparacion = $pdo->prepare($sentencia);
-                        $preparacion->execute();
-                        $id_reqdet = $pdo->lastInsertId();
+        $cantidad = $datosRecibidos["cantidadesIniciales"][$index] ?? 0;
+        $observs = $datosRecibidos["notasIniciales"][$index] ?? '';
+        $a_compras = $datosRecibidos["aCompras"][$index] ?? 0;
 
-                        $retorno["id_reqdet"][$index] = $id_reqdet;
+        // === 🔎 Buscar datos técnicos si existen ===
+        $cod_grupo = '0200';
+        $id_tipo   = 0;
+        $id_marca  = 0;
 
-                        if (isset($datosRecibidos["caracteristicasRespuestos"][$index])) {
+        if (isset($datosRecibidos["datosTecnicosItems"][$cod_item])) {
+            $cod_grupo = $datosRecibidos["datosTecnicosItems"][$cod_item]["cod_grupo"] ?? '0200';
+            $id_tipo   = $datosRecibidos["datosTecnicosItems"][$cod_item]["id_tipo"]   ?? 0;
+            $id_marca  = $datosRecibidos["datosTecnicosItems"][$cod_item]["id_marca"]  ?? 0;
+        }
 
-                            if (is_array($datosRecibidos["caracteristicasRespuestos"][$index])) {
-                                for ($index1 = 0; $index1 < count($datosRecibidos["caracteristicasRespuestos"][$index]); $index1++) {
-                                    $sentencia = "insert into vr_requerimcar (id_reqcar,id_requerim,id_reqdet,caract,vr_caract) "
-                                        . "values (null," . $id_requerim . "," . $id_reqdet . ",'" . $datosRecibidos["clavesCaracteristicasRespuestos"][$index][$index1] . "','" . $datosRecibidos["caracteristicasRespuestos"][$index][$index1] . "');";
-                                    $preparacion = $pdo->prepare($sentencia);
-                                    $preparacion->execute();
-                                    $retorno["id_reqcar"][$index][$index1] = $pdo->lastInsertId();
-                                }
-                            }
-                        }
-                    }
-                }
+        // === ✅ Insertar con prepared statements ===
+        $sentencia = "INSERT INTO vr_requerimdet 
+            (id_reqdet, id_requerim, linea, misional, articulo, tipo, marca, cod_item, cantidad, observs, a_compras, modo_import) 
+            VALUES 
+            (null, :id_requerim, :linea, '02', :articulo, :tipo, :marca, :cod_item, :cantidad, :observs, :a_compras, 1)";
+
+        $preparacion = $pdo->prepare($sentencia);
+        $preparacion->bindParam(':id_requerim', $id_requerim, PDO::PARAM_INT);
+        $preparacion->bindParam(':linea', $datosRecibidos["de_linea"]);
+        $preparacion->bindParam(':articulo', $cod_grupo);
+        $preparacion->bindParam(':tipo', $id_tipo, PDO::PARAM_INT);
+        $preparacion->bindParam(':marca', $id_marca, PDO::PARAM_INT);
+        $preparacion->bindParam(':cod_item', $cod_item);
+        $preparacion->bindParam(':cantidad', $cantidad, PDO::PARAM_INT);
+        $preparacion->bindParam(':observs', $observs);
+        $preparacion->bindParam(':a_compras', $a_compras, PDO::PARAM_INT);
+        $preparacion->execute();
+
+        $id_reqdet = $pdo->lastInsertId();
+        $retorno["id_reqdet"][$index] = $id_reqdet;
+
+        // === Características del repuesto ===
+        if (isset($datosRecibidos["caracteristicasRespuestos"][$index]) && is_array($datosRecibidos["caracteristicasRespuestos"][$index])) {
+            for ($index1 = 0; $index1 < count($datosRecibidos["caracteristicasRespuestos"][$index]); $index1++) {
+                $clave = $datosRecibidos["clavesCaracteristicasRespuestos"][$index][$index1] ?? '';
+                $valor = $datosRecibidos["caracteristicasRespuestos"][$index][$index1] ?? '';
+
+                $sentenciaCar = "INSERT INTO vr_requerimcar (id_reqcar, id_requerim, id_reqdet, caract, vr_caract) 
+                                    VALUES (null, :id_requerim, :id_reqdet, :caract, :vr_caract)";
+                $preparacionCar = $pdo->prepare($sentenciaCar);
+                $preparacionCar->bindParam(':id_requerim', $id_requerim, PDO::PARAM_INT);
+                $preparacionCar->bindParam(':id_reqdet', $id_reqdet, PDO::PARAM_INT);
+                $preparacionCar->bindParam(':caract', $clave);
+                $preparacionCar->bindParam(':vr_caract', $valor);
+                $preparacionCar->execute();
+                $retorno["id_reqcar"][$index][$index1] = $pdo->lastInsertId();
             }
         }
+    }
+}
 
         //para los repuestos que no existen
         if (isset($datosRecibidos["repNoExiste"]) && count($datosRecibidos["repNoExiste"]) > 0) {

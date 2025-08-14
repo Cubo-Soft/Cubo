@@ -118,31 +118,55 @@ class CL_im_items
                 //exit();
             }
 
-            // Ajuste Diego B 01-07-2025 - Valor USD real con fallback a cp_precios_provee por alter_item
+            // Ajuste Diego B 17-07-2025 - Valor USD real con fallback a cp_precios_provee por alter_item
             if ($opcion === 8) {
                 $this->sentencia = "SELECT * FROM im_items WHERE cod_item='" . $datos["cod_item"] . "'";
                 $OB_CL_Base = new CL_Base();
                 $resultado = $OB_CL_Base->leer($this->sentencia);
 
-                // Validar que exista resultado
                 if (isset($resultado[0])) {
-                    // Si el precio en USD está vacío o en 0, buscamos en cp_precios_provee usando alter_item
-                    if (floatval($resultado[0]['precio_vta_usd']) <= 0) {
-                        $alterItem = trim($resultado[0]["alter_item"]); // ← usar alter_item como ref_provee
+                    $alterItem = trim($resultado[0]["alter_item"]);
 
-                        $this->sentencia = "
-                            SELECT vr_provee AS precio_provee
-                            FROM cp_precios_provee
-                            WHERE ref_provee = '" . $alterItem . "'
-                            ORDER BY fecha_ultima DESC
-                            LIMIT 1";
+                    // Paso 1: Obtener grupo_provee y vr_provee del item
+                    $this->sentencia = "SELECT grupo_provee, vr_provee FROM cp_precios_provee WHERE ref_provee = '$alterItem' ORDER BY fecha_ultima DESC LIMIT 1";
+                    $datosProvee = $OB_CL_Base->leer($this->sentencia);
 
-                        $precioAlterno = $OB_CL_Base->leer($this->sentencia);
+                    if (isset($datosProvee[0])) {
+                        $grupo = $datosProvee[0]['grupo_provee'];
+                        $vr_provee = floatval($datosProvee[0]['vr_provee']);
 
-                        if (isset($precioAlterno[0]["precio_provee"])) {
-                            $resultado[0]['precio_vta_usd'] = $precioAlterno[0]["precio_provee"];
+                        // Paso 2: Obtener id_fact de factor 'salem'
+                        $this->sentencia = "SELECT id_fact FROM cp_factor_provee WHERE fact_corto = 'salem' LIMIT 1";
+                        $resFactor = $OB_CL_Base->leer($this->sentencia);
+
+                        if (isset($resFactor[0]['id_fact'])) {
+                            $id_fact = $resFactor[0]['id_fact'];
+
+                            // Paso 3: Obtener multiplicador para ese grupo y factor
+                            $this->sentencia = "SELECT valor FROM cp_multi_provee WHERE cod_grupo = '$grupo' AND id_fact = $id_fact LIMIT 1";
+                            $resMulti = $OB_CL_Base->leer($this->sentencia);
+
+                            if (isset($resMulti[0]['valor'])) {
+                                $multiplicador = floatval($resMulti[0]['valor']);
+                                $precioUSD = $vr_provee * $multiplicador;
+
+                                if ($precioUSD > 0) {
+                                    $resultado[0]['precio_vta_usd'] = $precioUSD;
+                                }
+                            } else {
+                                // ❗ No hay multiplicador => llamar SP como fallback
+                                $this->sentencia = "CALL spDaPrecioUsd('$datos[cod_item]', $vr_provee)";
+                                $resSP = $OB_CL_Base->leer($this->sentencia);
+
+                                if (isset($resSP[0]['valor_final'])) {
+                                    $resultado[0]['precio_vta_usd'] = floatval($resSP[0]['valor_final']);
+                                }
+                            }
                         }
                     }
+
+                    // Compatibilidad: igualar a precio_vta
+                    $resultado[0]['precio_vta'] = $resultado[0]['precio_vta_usd'] ?? 0;
                 }
 
                 return $resultado;
@@ -301,6 +325,47 @@ class CL_im_items
                     . "AND im_items.cod_item='" . $datos["cod_item"] . "';";
             }
 
+            if ($opcion === 27) {
+    $this->sentencia = "SELECT 
+        i.cod_item,
+        i.alter_item,
+        i.nom_item,
+        i.unidad,
+        i.grup_item,
+        i.id_marca,
+        i.tipo_item,
+        i.modelo,
+        i.dimensiones,
+        i.precio_vta,
+        i.precio_vta_usd,
+        COALESCE(i.foto, '../img_inve/sin_imagen.jpg') AS foto,
+        i.minimo,
+        i.maximo,
+        COALESCE(s.saldo, 0) AS saldo,
+        CONCAT('Grupo ', i.grup_item) AS nom_grupo,
+        CASE 
+            WHEN i.id_marca > 0 THEN CONCAT('Marca ID:', i.id_marca) 
+            ELSE 'Marca N/A' 
+        END AS nom_marca,
+        'Sin descripción' AS descrip,
+        'N/A' AS descrip_modelo,
+        'N/A' AS nom_dimen
+    FROM im_items i
+    LEFT JOIN ir_salinve s ON i.cod_item = s.cod_item AND s.codbodeg = 1
+    WHERE i.cod_item = '" . $datos["cod_item"] . "'";
+}
+
+            
+            // if ($opcion === 27) {
+            //     $sql = "SELECT ii.cod_item, ii.alter_item, ii.nom_item, 'Repuestos' AS nom_grupo, ii.nom_item AS descrip, 
+            //                         COALESCE(m.nom_marca, 'GENÉRICO') AS nom_marca, 'N/A' AS descrip_modelo, 'N/A' AS nom_dimen, ii.unidad AS nom_unidad, 0 AS saldo, ii.precio_vta_usd AS precio_vta,
+            //                         COALESCE(ii.foto, '../img_inve/sin_imagen.jpg') AS foto, ii.grup_item AS cod_grupo FROM im_items ii LEFT JOIN im_marca m ON m.id_marca = ii.id_marca
+            //                         WHERE ii.cod_item = '" . $datos["cod_item"] . "' LIMIT 1 ";
+
+            //     $base = new CL_Base();
+            //     return $base->leer($sql);
+            // }
+
             //echo $this->sentencia; exit();
 
             $OB_CL_Base = new CL_Base();
@@ -310,28 +375,56 @@ class CL_im_items
         }
     }
 
+    //Nuevo aujste en crear para inserción de productos Diego B 14-07-2025
     public function crear($datos, $opcion)
     {
         try {
             if ($opcion === 1) {
-                $this->sentencia = "insert into im_items (cod_item,alter_item,nom_item,unidad,grup_item,
-               id_proveedor,id_marca,unid_desgaste,cant_desgaste,facturable,
-               area_item,articulo,tipo_item,num_parte,estado_item,
-               iva,precio_vta,modelo,linea,peso,
-               volumen,dimensiones,precio_vta_usd,minimo,maximo,
-               foto) values "
-                    . "('" . $datos["cod_item"] . "','" . $datos["alter_item"] . "','" . $datos["nom_item"] . "','" . $datos["unidad"] . "','" . $datos["grup_item"] . "',"
-                    . $datos["id_proveedor"] . "," . $datos["id_marca"] . "," . $datos["unid_desgaste"] . "," . $datos["cant_desgaste"] . "," . $datos["facturable"] . ","
-                    . $datos["area_item"] . "," . $datos["articulo"] . "," . $datos["tipo_item"] . ",'" . $datos["num_parte"] . "'," . $datos["estado_item"] . ","
-                    . $datos["iva"] . "," . $datos["precio_vta"] . "," . $datos["modelo"] . ",'" . $datos["linea"] . "','" . $datos["peso"] . "','"
-                    . $datos["volumen"] . "','" . $datos["dimensiones"] . "'," . $datos["precio_vta_usd"] . "," . $datos["minimo"] . "," . $datos["maximo"] . ",'"
-                    . $datos["foto"] . "');";
+                $this->sentencia = "INSERT INTO im_items (
+        cod_item, alter_item, nom_item, unidad, grup_item,
+        id_proveedor, id_marca, unid_desgaste, cant_desgaste, facturable,
+        area_item, articulo, tipo_item, num_parte, estado_item,
+        iva, precio_vta, modelo, linea, peso,
+        volumen, dimensiones, precio_vta_usd, minimo, maximo,
+        foto
+    ) VALUES (
+        '" . addslashes($datos["cod_item"]) . "',
+        '" . addslashes($datos["alter_item"]) . "',
+        '" . addslashes($datos["nom_item"]) . "',
+        '" . addslashes($datos["unidad"]) . "',
+        '" . addslashes($datos["grup_item"]) . "',
+        " . (int) $datos["id_proveedor"] . ",
+        " . (int) $datos["id_marca"] . ",
+        '" . addslashes($datos["unid_desgaste"]) . "',
+        " . (float) $datos["cant_desgaste"] . ",
+        " . (int) $datos["facturable"] . ",
+        " . (int) $datos["area_item"] . ",
+        '" . addslashes($datos["articulo"]) . "',
+        '" . addslashes($datos["tipo_item"]) . "',
+        '" . addslashes($datos["num_parte"]) . "',
+        " . (int) $datos["estado_item"] . ",
+        " . (float) $datos["iva"] . ",
+        " . (float) $datos["precio_vta"] . ",
+        '" . addslashes($datos["modelo"]) . "',
+        " . (int) $datos["linea"] . ",
+        '" . addslashes($datos["peso"]) . "',
+        '" . addslashes($datos["volumen"]) . "',
+        '" . addslashes($datos["dimensiones"]) . "',
+        " . (float) $datos["precio_vta_usd"] . ",
+        " . (int) $datos["minimo"] . ",
+        " . (int) $datos["maximo"] . ",
+        '" . addslashes($datos["foto"]) . "'
+    );";
             }
             //echo $this->sentencia; exit();
             $OB_CL_Base = new CL_Base();
             return $OB_CL_Base->crear($this->sentencia);
         } catch (PDOException $exc) {
-            echo $exc->getTraceAsString();
+            echo json_encode([
+                "status" => "error",
+                "mensaje" => "Error en la base de datos: " . $exc->getMessage()
+            ]);
+            exit;
         }
     }
 

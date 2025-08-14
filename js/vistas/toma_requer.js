@@ -17,7 +17,7 @@ $(document).ready(function () {
     $("#divCantidadRepuestos").hide();
     $("#divEstadosRequerimiento").hide();
     $("#divBotonRecargar").hide();
-    $("#adicionarClienteProvisional").hide(); 
+    $("#adicionarClienteProvisional").hide();
     $("#modificarContacto").hide();
     $("#iniciarCotizacion").hide();
     $("#solicitudACompras").hide();
@@ -347,27 +347,27 @@ $(document).ready(function () {
     $("#btnCrearRequerimiento").on('mouseenter', function () {
 
         id_contacto = 0;
-    
+
         if (numid === null || numid === '0') {
             numid = $("#numid").val();
         }
-    
+
         if (cc_contacto === null) {
             cc_contacto = $("#cc_contacto").val();
         }
-    
+
         cc_contacto = parseInt(cc_contacto);
         id_contacto = parseInt($("#id_contacto").val());
-    
+
         // ADICIONO CONTROL PARA EVITAR id_sucursal en cero ( 0 ). {rmg} 2025-05-22
         if (id_sucursal == null || id_sucursal == 0) {
             id_sucursal = $("#id_sucursal").val();
         }
-    
+
         let esClienteProvisional = $("#clienteProvisional").val() === '1';
-    
+
         if ($("#ip_grupos").val() !== '03') {
-    
+
             if (id_contacto === 0 && !esClienteProvisional) {
                 $("#divMensajesRequerimientos").html('<div class="callout callout-warning">Por favor recuerde seleccionar un contacto </div>');
                 $("#btnCrearRequerimiento").prop("disabled", true);
@@ -385,23 +385,23 @@ $(document).ready(function () {
                 $("#btnCrearRequerimiento").prop("disabled", false);
                 $("#divMensajesRequerimientos").html('');
             }
-    
+
             $("#id_mantenimiento").val('0');
-    
+
         } else {
-    
+
             if ($("#ip_lineas").val() === '-1') {
                 $("#btnCrearRequerimiento").prop("disabled", true);
                 $("#ip_lineas").focus();
                 $("#divMensajesRequerimientos").html('<div class="callout callout-warning">Se va a crear un requerimiento para el mantenimiento de un equipo. Por favor seleccione la "Sub línea"</div>');
             } else {
-    
+
                 textosIniciales = ['0'];
                 clavesCaracteristicasEquipos = ['0'];
-    
+
                 const selects = $('select[id^="tm_"]');
                 var bandera = false;
-    
+
                 selects.each(function () {
                     const valor = $(this).find('option:selected').val();
                     if (valor.toString() === "-1") {
@@ -410,7 +410,7 @@ $(document).ready(function () {
                         mantenimientoARealizar += valor + '|';
                     }
                 });
-    
+
                 if (bandera) {
                     $("#btnCrearRequerimiento").prop("disabled", true);
                     $("#divMensajesRequerimientos").html('<div class="alert alert-danger">Por favor seleccione los tipos de mantenimiento a realizar a los equipos. Están al final de cada registro de cada equipo en una lista desplegable!</div>');
@@ -443,10 +443,10 @@ $(document).ready(function () {
 
                 } else {
 
-                    if( $("#fuente").val() === -1 ){
+                    if ($("#fuente").val() === -1) {
                         alert("Por favor, indique la fuente");
                         $("#fuente").focus();
-                    }else{
+                    } else {
                         $("#divMensajesRequerimientos").html('');
 
                         if ($("#clienteProvisional").val() === '1') {
@@ -458,10 +458,10 @@ $(document).ready(function () {
                             datosClientePrisional["contacto"] = $("#contacto_cp").val();
                             datosClientePrisional["id_region"] = $("#ap_regiones2").val();
                         }
-    
+
                         $("#mensajesClientesProvisionales").html('');
                         $("#divMensajesRequerimientos").html('');
-    
+
                         datosRequerimiento.numid = numid;
                         datosRequerimiento.nom_cliente = $("#razon_social").val();
                         datosRequerimiento.cc_contacto = cc_contacto;
@@ -471,10 +471,30 @@ $(document).ready(function () {
                         datosRequerimiento.misional = $("#ip_grupos").val();
                         datosRequerimiento.observs = $("#textAreaObservaciones").val();
                         datosRequerimiento.id_fuente = $("#fuentes").val();
-                        datosRequerimiento.textosIniciales = textosIniciales;
-                        datosRequerimiento.valoresIniciales = valoresIniciales;
-                        datosRequerimiento.cantidadesIniciales = cantidadesIniciales;
+                        // === ✅ ASEGURAR QUE LOS DATOS SEAN COMPATIBLES CON EL BACKEND === Diego B 31-07-2025
+                        // textosIniciales debe ser un array de strings
+                        datosRequerimiento.textosIniciales = textosIniciales; // array de códigos de items
+
+                        datosRequerimiento.cantidadesIniciales = cantidadesIniciales.map(val => parseInt(val) || 0);
                         datosRequerimiento.notasIniciales = notasIniciales;
+                        datosRequerimiento.aCompras = aCompras; // Este ya es un array: aCompras.push(1 o 0)
+
+                        // valoresIniciales (nom_item) debe ser array de strings
+                        // === ✅ valoresIniciales: Array de nombres de items (uno por cada código en textosIniciales)
+                        let valoresInicialesFinal = [];
+
+                        // Recorremos cada código de item en textosIniciales
+                        datosRequerimiento.textosIniciales.forEach((codItem, index) => {
+                            // Si el código coincide con el nuevo item (el que viene de cp_precios_provee)
+                            if (window.itemParaRequerimiento && window.itemParaRequerimiento.cod_item === codItem) {
+                                valoresInicialesFinal.push(window.itemParaRequerimiento.nom_item || 'Nuevo item sin nombre');
+                            } else {
+                                // Si es un item existente, usamos el valor de valoresIniciales[index]
+                                valoresInicialesFinal.push(valoresIniciales[index] || 'Item sin nombre');
+                            }
+                        });
+
+                        datosRequerimiento.valoresIniciales = valoresInicialesFinal;
                         datosRequerimiento.caracteristicasRespuestos = caracteristicasRepuestosEnviar;
                         datosRequerimiento.textosCaracteristicasRepuestos = textosCaracteristicasRepuestosEnviar;
                         datosRequerimiento.clavesCaracteristicasRespuestos = clavesCaracteristicasRepuestosEnviar;
@@ -497,26 +517,50 @@ $(document).ready(function () {
                         datosRequerimiento.repuestosSinExistencia = repuestosSinExistencia;
                         datosRequerimiento.vp_asesor_zona = $("#vp_asesor_zona").val();
                         datosRequerimiento.repNoExiste = repNoExiste;
+
+                        // === 🔧 INYECTAR DATOS TÉCNICOS DEL ÚLTIMO ITEM CREADO === Diego B 31-07-2025
+                        if (window.itemParaRequerimiento && Array.isArray(datosRequerimiento.textosIniciales)) {
+                            const cod_item = window.itemParaRequerimiento.cod_item;
+
+                            if (!datosRequerimiento.datosTecnicosItems) {
+                                datosRequerimiento.datosTecnicosItems = {};
+                            }
+
+                            // Solo inyectamos si el item nuevo está en textosIniciales
+                            if (datosRequerimiento.textosIniciales.includes(cod_item)) {
+                                datosRequerimiento.datosTecnicosItems[cod_item] = {
+                                    cod_grupo: window.itemParaRequerimiento.cod_grupo || '0200',
+                                    id_tipo: window.itemParaRequerimiento.id_tipo || 0,
+                                    id_marca: window.itemParaRequerimiento.id_marca || 0,
+                                    id_unidad: window.itemParaRequerimiento.id_unidad || null
+                                };
+                            }
+                        }
+
                         datosRequerimiento.aCompras = aCompras;
                         datosRequerimiento.id_mantenimientos = $("#id_mantenimientos").val();
-                        datosRequerimiento.mantenimientoARealizar=mantenimientoARealizar;
-    
+                        datosRequerimiento.mantenimientoARealizar = mantenimientoARealizar;
+
+                        console.log("📦 textosIniciales:", datosRequerimiento.textosIniciales);
+
                         $.ajax({
                             url: "../controladores/CT_grabar_requerimiento.php",
-                            data: { 'datosAEnviar': datosRequerimiento },
                             type: "POST",
+                            data: {
+                                'datosAEnviar': datosRequerimiento
+                            },
                             success: function (respuesta) {
                                 try {
                                     var obj = JSON.parse(respuesta);
                                     if (obj["id_requerim"] !== '0' && obj["id_reqdet"].length !== 0) {
-    
+
                                         $("#estadoRequerimiento").val('82');
                                         $("#divBotonGrabarRequerimiento").hide();
                                         $("#divEstadosRequerimiento").show();
                                         $("#divRepuestos").hide();
-                                        $("#divMensajesRequerimientos").html('<div class="callout callout-success"><strong>Requerimiento número: ' + obj["id_requerim"] + ' asignado a '+obj["asesor_asignado"]+' creado de manera correcta.</strong> Puede continuar con otra acción o presionar el botón "Limpiar" si desea tomar otro requerimiento!</div>');
+                                        $("#divMensajesRequerimientos").html('<div class="callout callout-success"><strong>Requerimiento número: ' + obj["id_requerim"] + ' asignado a ' + obj["asesor_asignado"] + ' creado de manera correcta.</strong> Puede continuar con otra acción o presionar el botón "Limpiar" si desea tomar otro requerimiento!</div>');
                                         $("#divBotonRecargar").show();
-    
+
                                         //evalua si el permiso para crear la cotización por parte del perfil esta activo
                                         if (permisos.indexOf("COT") !== -1) {
                                             //si el asesor asignado es el mismo que esta grabando el requerimiento entonces muestra el botón 
@@ -525,15 +569,15 @@ $(document).ready(function () {
                                                 $("#iniciarCotizacion").show();
                                             }
                                         }
-    
+
                                         //evalua si el permiso para enviar la solicitud a compras está activo
                                         if (permisos.indexOf("RQC") !== -1) {
                                             $("#solicitudACompras").show();
                                         }
-    
+
                                         $("#tomarOtroRequerimiento").show();
                                         $("#id_requerim").val(obj["id_requerim"]);
-    
+
                                     } else {
                                         $("#divMensajesRequerimientos").html('<div class="callout callout-warning">Esto realmente es vergonsozo!Ha surgido un error durante la grabación del requerimiento. Es necesario volver a tomar toda la información. Podría por favor presionar la combinación de teclas "CTRL" + "SHIFT" + "R" e intentarlo nuevamente? En caso de volver a presentarse el fallo, por favor informe!</div>');
                                     }
@@ -552,7 +596,7 @@ $(document).ready(function () {
                             }
                         });
                     }
-                    
+
                 }
             }
         });

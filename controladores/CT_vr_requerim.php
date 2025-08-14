@@ -120,21 +120,67 @@ if ($_POST["caso"] === '2') {
         $retorno["vr_requerimcar"][$index] = $OB_vr_requerimcar->leer($datos, 1);
 
         if ($retorno["vr_requerimdet"][$index]["cod_item"] !== '0') {
-
             $datos["cod_item"] = preg_replace('/\s+/', '', $retorno["vr_requerimdet"][$index]["cod_item"]);
-            $datos["im_items"] = $OB_im_items->leer($datos, 15);
+
+            // === 🔍 VERIFICAR SI EL ITEM ES NUEVO (sin grupo o marca válidos) ===
+            $esItemNuevo = false;
+
+            // Si el item no tiene grupo válido o marca válida, lo tratamos como nuevo
+            if (strlen($datos["cod_item"]) > 6) {
+                $esItemNuevo = true;
+            }
+
+            // === 🔍 VERIFICAR SI ES UN ITEM NUEVO ===
+            if ($retorno["vr_requerimdet"][$index]["a_compras"] == 1) {
+                $esItemNuevo = true;
+            }
+
+            // === 🔧 LEER CON CASO 21 (seguro) SI ES NUEVO, CASO 15 (completo) SI ES VIEJO ===
+            if ($esItemNuevo) {
+                $datos["im_items"] = $OB_im_items->leer($datos, 27);
+            } else {
+                $datos["im_items"] = $OB_im_items->leer($datos, 15);
+            }
+
+            // === 🔧 CONSTRUIR OBJETO CON DATOS COMPLETOS ===
+            if ($datos["im_items"] && is_array($datos["im_items"]) && count($datos["im_items"]) > 0) {
+                $item = $datos["im_items"][0];
+
+                $itemData = [
+                    //'nom_item' => $item['nom_item'] ?? 'Repuesto sin nombre',
+                    'nom_grupo' => $item['nom_grupo'] ?? 'Grupo ' . ($item['grup_item'] ?? '0200'),
+                    'nom_marca' => $item['nom_marca'] ?? ($item['id_marca'] > 0 ? "Marca ID:{$item['id_marca']}" : 'Marca N/A'),
+                    'nom_unidad' => $item['nom_unidad'] ?? $item['unidad'] ?? 'UND',
+                    'descrip' => $item['nom_item'] ?? $item['nom_item'] ?? 'Sin descripción',
+                    'descrip_modelo' => $item['descrip_modelo'] ?? $item['modelo'] ?? 'N/A',
+                    'nom_dimen' => $item['nom_dimen'] ?? $item['dimensiones'] ?? 'N/A',
+                    'saldo' => $item['saldo'] ?? 0,
+                    'precio_vta' => $item['precio_vta'] ?? '0.00',
+                    'foto' => $item['foto'] ?? '../img_inve/sin_imagen.jpg'
+                ];
+            } else {
+                $itemData = [
+                    'nom_item' => 'Repuesto no encontrado',
+                    'nom_grupo' => 'Grupo N/A',
+                    'nom_marca' => 'Marca N/A',
+                    'nom_unidad' => 'UND',
+                    'descrip' => 'Sin descripción',
+                    'descrip_modelo' => 'N/A',
+                    'nom_dimen' => 'N/A',
+                    'saldo' => 0,
+                    'precio_vta' => '0.00',
+                    'foto' => '../img_inve/sin_imagen.jpg'
+                ];
+            }
+
+            $datos["im_items"] = [$itemData];
             $retorno["ir_resinve"][$index] = $OB_ir_resinve->leer($datos, 1);
 
-            if ($retorno["vr_requerimdet"][$index]["misional"] === '02') {
-                // //retorna los repuestos que tienen saldo mayor a cero 
-                if (intval($datos["im_items"][0]["saldo"]) > 0) {
-                    $retorno["repuestosConSaldo"][$index] = $datos["im_items"];
-                }
-
-                //retorna los repuestos que tienen saldo igual a cero 
-                if (intval($datos["im_items"][0]["saldo"]) === 0) {
-                    $retorno["repuestosSinSaldo"][$index] = $datos["im_items"];
-                }
+            $saldo = intval($itemData["saldo"]);
+            if ($saldo > 0) {
+                $retorno["repuestosConSaldo"][$index] = $datos["im_items"];
+            } else {
+                $retorno["repuestosSinSaldo"][$index] = $datos["im_items"];
             }
 
             if ($retorno["vr_requerimdet"][$index]["misional"] === '03') {
@@ -204,7 +250,7 @@ if ($_POST["caso"] === '2') {
         $datos["nit_cliente"] = $retorno["vr_requerim"][0]["nit_cliente"];
         $retorno["vm_clientesprov"] = $OB_vm_clientesprov->leer($datos, 1);
 
-        
+
     }
 
 

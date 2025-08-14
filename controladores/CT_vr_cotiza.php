@@ -1,6 +1,5 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', '1');
+
 session_start();
 
 include_once '../modelos/CL_vr_cotiza.php';
@@ -19,8 +18,6 @@ include_once '../modelos/CL_vm_clientesprov.php';
 include_once '../modelos/CL_vm_dsctos_especiales.php';
 include_once '../modelos/CL_vp_limites.php';
 include_once '../modelos/CL_nm_contactos.php';
-include_once '../cls/varios.php';  // ← Este es el que hace falta para la trm
-
 
 $OB_vr_cotiza = new CL_vr_cotiza();
 $OB_vr_cotizadet = new CL_vr_cotizadet();
@@ -70,54 +67,48 @@ if ($_POST["caso"] === '1') {
 
     for ($index = 0; $index < count($retorno["vr_cotizadet"]); $index++) {
 
-        // === NUEVO BLOQUE para mostrar valores en USD y COP Diego B 07-07-2025===
-        // USD real: lo que ya tiene la cotización guardado
-        // ✅ Diego B: Consultar USD real desde procedimiento almacenado por cod_item y alter_item
-        $datos["cod_item"] = trim($retorno["vr_cotizadet"][$index]["cod_item"]);
-        $datos["alter_item"] = $retorno["vr_cotizadet"][$index]["alter_item"] ?? 0;
+        $codItem = trim($retorno["vr_cotizadet"][$index]["cod_item"]);
 
-
-        // ✅ Usa lo que ya está almacenado
-        $precioUSD = floatval($retorno["vr_cotizadet"][$index]["valor_unit_usd"] ?? 0);
-        $precioCOP = floatval($retorno["vr_cotizadet"][$index]["valor_unit_cop"] ?? 0);
-
-        // ✅ Si no existieran, podrías usar el procedimiento como fallback (opcional)
-        if ($precioUSD <= 0) {
-            $precioUSD = floatval($OB_im_items->ejecutarPA($datos, 1)); // solo si falla el valor guardado
-        }
-
-        $trm = lee_politrm();
-        $precioCOP = $precioCOP > 0 ? $precioCOP : round($precioUSD * $trm, 2);
-
-        $retorno["cm_trm"] = $trm;
-
-        $retorno["vr_cotizadet"][$index]["precio_vta_usd"] = $precioUSD;
-        $retorno["vr_cotizadet"][$index]["precio_vta"] = $precioCOP;
-        $retorno["vr_cotizadet"][$index]["valor_unit_usd"] = $precioUSD;
-        $retorno["vr_cotizadet"][$index]["valor_unit_cop"] = $precioCOP;
-        $retorno["precioDolares"][$index] = $precioUSD;
-
-
-        // 👁️ Este es el que se ve inicialmente
-        $retorno["precioDolares"][$index] = $precioCOP;
-
-        // Ajuste Diego B 03-07-2025: Valor USD real con fallback a cp_precios_provee por alter_item
-        // Asegura tener el cod_item antes de usar el caso 8 de CL_im_items
-        $datos["cod_item"] = trim($retorno["vr_cotizadet"][$index]["cod_item"]);
-
-
-        if ($retorno["vr_cotizadet"][$index]["cod_item"] !== '0' || $retorno["vr_cotizadet"][$index]["cod_item"] !== 'NULL') {
-
-            $datos["cod_item"] = preg_replace('/\s+/', '', $retorno["vr_cotizadet"][$index]["cod_item"]);
+        // Solo si hay ítem válido
+        if ($codItem !== '0' && strtoupper($codItem) !== 'NULL' && $codItem !== '') {
+            $datos["cod_item"] = $codItem;
             $retorno["caracteristicasRepuestos"][$index] = $OB_im_items->leer($datos, 15);
-            // ✅ Inyectar los valores reales para que el frontend los capture
-            $retorno["caracteristicasRepuestos"][$index][0]["precio_vta_usd"] = $retorno["vr_cotizadet"][$index]["valor_unit_usd"];
-            $retorno["caracteristicasRepuestos"][$index][0]["precio_vta"] = $retorno["vr_cotizadet"][$index]["valor_unit_cop"];
+
+            // ✅ Leer precio USD (leer(..., 8))
+            $precioItem = $OB_im_items->leer($datos, 8);
+
+            if (isset($precioItem[0]["precio_vta_usd"])) {
+                $valorUSD = floatval($precioItem[0]["precio_vta_usd"]);
+
+                // Obtener TRM actual
+                $consultaTRM = "SELECT trm FROM cm_trm ORDER BY fecha DESC LIMIT 1";
+                $OB_con = new CL_conexion();
+                $resultadoTRM = $OB_con->retornar($consultaTRM);
+                $trmActual = isset($resultadoTRM[0]["trm"]) ? floatval($resultadoTRM[0]["trm"]) : 0;
+
+                $valorCOP = $trmActual > 0 ? round($valorUSD * $trmActual, 2) : 0;
+
+                // Guardar en JSON de respuesta
+                $retorno["vr_cotizadet"][$index]["valor_unit_usd"] = $valorUSD;
+                $retorno["vr_cotizadet"][$index]["valor_unit_cop"] = $valorCOP;
+                $retorno["vr_cotizadet"][$index]["precio_vta_usd"] = $valorUSD;
+
+                // Valor unitario según moneda
+                $retorno["vr_cotizadet"][$index]["valor_unit"] =
+                    ($retorno["vr_cotiza"][0]["moneda"] === 'USD') ? $valorUSD : $valorCOP;
+
+                // Esto solo agrega los valores ya calculados para que el PDF los reciba.
+            $retorno["caracteristicasRepuestos"][$index][0]["valor_unit_usd"] = floatval($retorno["vr_cotizadet"][$index]["valor_unit"]);
+            $retorno["caracteristicasRepuestos"][$index][0]["valor_unit_cop"] = floatval($retorno["vr_cotizadet"][$index]["valor_unit"] * ($retorno["vr_cotiza"][0]["trm"] ?? 1));
+            $retorno["caracteristicasRepuestos"][$index][0]["iva_referencia"] = floatval($retorno["vr_cotizadet"][$index]["iva_referencia"] ?? 0);
+
+            }
 
         } else {
             $retorno["caracteristicasRepuestos"][$index] = array();
         }
 
+        // 👇 Grupos, tipos, marcas
         if ($retorno["vr_cotizadet"][$index]["misional"] === '01' || $retorno["vr_cotizadet"][$index]["misional"] === '04') {
             $datos["cod_grupo"] = $retorno["vr_cotizadet"][$index]["articulo"];
             $retorno["ip_grupos"][$index] = $OB_ip_grupos->leer($datos, 3);
@@ -128,32 +119,27 @@ if ($_POST["caso"] === '1') {
             $datos["id_marca"] = $retorno["vr_cotizadet"][$index]["marca"];
             $retorno["ip_marcas"][$index] = $OB_ip_marcas->leer($datos, 2);
         } else {
-
             $retorno["ip_grupos"][$index] = array();
             $retorno["ip_tipos"][$index] = array();
             $retorno["ip_marcas"][$index] = array();
         }
 
+        // 👇 Características adicionales
         $datos["id_consecot"] = $retorno["vr_cotizadet"][$index]["id_consecot"];
         $datos["id_orden"] = $retorno["vr_cotizadet"][$index]["id_orden"];
         $retorno["vr_cotizcar"][$index] = $OB_vr_cotizcar->leer($datos, 1);
 
         if (count($retorno["vr_cotizcar"][$index]) === 0) {
-
             $retorno["textosCaracteristicas"][$index][0] = array();
-
         } else {
-
             for ($index1 = 0; $index1 < count($retorno["vr_cotizcar"][$index]); $index1++) {
-
                 $datos["codgrup"] = $retorno["vr_cotizadet"][$index]["articulo"];
                 $datos["codcarac"] = $retorno["vr_cotizcar"][$index][$index1]["caract"];
                 $retorno["textosCaracteristicas"][$index][$index1] = $OB_ir_caracte->leer($datos, 2);
             }
         }
-
-
     }
+
 
     $data_nm_sucursal = $OB_nm_sucursal->leer($datos, 2);
 
@@ -172,9 +158,9 @@ if ($_POST["caso"] === '1') {
         $datos["nit_cliente"] = $data_nm_sucursal[0]["numid"];
         $retorno["vm_clientesprov"] = $OB_vm_clientesprov->leer($datos, 1);
     }
+
     echo json_encode($retorno);
 }
-
 
 if ($_POST["caso"] === '2') {
 
