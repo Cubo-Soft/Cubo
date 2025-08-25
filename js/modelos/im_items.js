@@ -66,7 +66,7 @@ function retornarIMItems(data, opcion) {
 
                         $("#divProductosIniciales").html(crearSelectMultiple(datos, obj, datosDeLista, 0));
 
-                    //equipos    
+                        //equipos    
                     } else if ($("#ip_grupos").val() === '01') {
 
                         $("#textoUnido2").html(textoUnido);
@@ -620,7 +620,7 @@ function retornarIMItems(data, opcion) {
                 'cod_item': data[0]["cod_item"],
                 'filtro': '0'
             };
-            
+
             $("#ip_lineas").val(data[0]["linea"]);  // adicion 2025-06-09 {rmg}
             $("#grup_items2").val(data[0]["grup_item"]);
             $("#tipos2").val(data[0]["tipo_item"]);
@@ -646,6 +646,14 @@ function retornarIMItems(data, opcion) {
                     alert("Error function retornarIMItems(datos, opcion=10) {...\nError from server, please call support");
                 }
             });
+
+            // 🟢 Simulamos clic automático solo si el botón existe Diego B 25-07-2025
+            if ($("#agregarProducto").length) {
+                setTimeout(() => {
+                    $("#agregarProducto").click();
+                    console.log("✔ Repuesto nuevo agregado automáticamente");
+                }, 200); // delay de seguridad
+            }
         }
 
     } else {
@@ -657,6 +665,122 @@ function retornarIMItems(data, opcion) {
     }
 }
 
+function consultarInsertarDesdeCpPreciosProvee(alter_item) {
+    console.log("🔹 [consultarInsertarDesdeCpPreciosProvee] INICIO → alter_item:", alter_item);
+
+    $.ajax({
+        url: "../controladores/CT_im_items.php",
+        type: "POST",
+        data: { caso: "29", datosAEnviar: { alter_item: alter_item } },
+        success: function (response) {
+            console.log("🔹 Respuesta cruda del servidor:", response);
+
+            let obj;
+            try {
+                obj = JSON.parse(response);
+            } catch (e) {
+                console.error("❌ Error al parsear JSON:", e);
+                mostrarMensaje("Error del servidor: respuesta inválida.", "danger");
+                return;
+            }
+
+            // Verificamos que venga datosRepuesto
+            let item = null;
+            if (obj.datosRepuesto && Array.isArray(obj.datosRepuesto) && obj.datosRepuesto.length > 0) {
+                item = obj.datosRepuesto[0];
+            } else if (obj.datosRepuesto && typeof obj.datosRepuesto === 'object') {
+                item = obj.datosRepuesto;
+            }
+
+            if (!item) {
+                mostrarMensaje(`No se encontró información para el repuesto <strong>${alter_item}</strong>.`, "warning");
+                return;
+            }
+
+            // === 🔥 GUARDAMOS LOS DATOS TÉCNICOS PARA EL REQUERIMIENTO ===
+            window.itemParaRequerimiento = {
+                cod_item: item.cod_item,
+                cod_grupo: item.cod_grupo || '0200',   // ✅ viene del backend
+                id_tipo: item.id_tipo || 0,           // ✅ viene (o por defecto)
+                id_marca: item.id_marca || 0,         // ✅
+                id_unidad: item.id_unidad || null,
+                alter_item: item.alter_item,
+                nom_item: item.nom_item,
+                precio_vta: item.precio_vta || "0.00",
+                foto: item.foto || "../img_inve/sin_imagen.jpg"
+            };
+
+            console.log("✅ Datos guardados para requerimiento:", window.itemParaRequerimiento);
+
+            // === 🛠️ MAPEO PARA LA TABLA (solo para mostrar) ===
+            let itemMapeado = {
+                cod_item: item.cod_item,
+                alter_item: item.alter_item,
+                nom_item: item.nom_item,
+                nom_grupo: item.grup_item ? `Grupo ${item.grup_item}` : "Sin grupo",
+                descrip: item.tipo_item && item.tipo_item !== "N/A"
+                    ? item.tipo_item
+                    : item.nom_item ? item.nom_item.substring(0, 30) + "..." : "Sin descripción",
+                nom_marca: item.id_marca ? `Marca ID:${item.id_marca}` : "Sin marca",
+                descrip_modelo: item.modelo && item.modelo !== "0" ? item.modelo : "N/A",
+                nom_dimen: item.dimensiones && item.dimensiones !== "0" ? item.dimensiones : "N/A",
+                nom_unidad: item.unidad || "UND",
+                precio_vta: item.precio_vta || "0.00",
+                saldo: 0,
+                foto: item.foto || "../img_inve/sin_imagen.jpg"
+            };
+
+            // Asegurar ir_resinve
+            let ir_resinve = Array.isArray(obj.ir_resinve) ? obj.ir_resinve : [];
+
+            // Preparar tabla
+            let tempObj = {
+                datosRepuesto: [itemMapeado],
+                ir_resinve: ir_resinve
+            };
+
+            // Mostrar mensaje
+            mostrarMensaje(`Repuesto <strong>${itemMapeado.cod_item}</strong> cargado correctamente.`, "success");
+
+            // Armar tabla
+            let data2 = { id_tabla: "tablaProductosBorradores" };
+            let tablaHTML = armarTablaProductosBorradores(tempObj, data2, 1);
+            $("#divProductosBorradores").html(tablaHTML);
+
+            // Mostrar controles
+            $("#divCantidadRepuestos").show();
+            mostrarDivCantidadRepuestos();
+
+        },
+        error: function (xhr, status, error) {
+            console.error("AJAX Error:", status, error);
+            mostrarMensaje("Error de conexión con el servidor.", "danger");
+        }
+    });
+
+    function mostrarMensaje(texto, tipo) {
+        $("#divTextoRepuestos").html(`<div class="callout callout-${tipo}">${texto}</div>`);
+        setTimeout(() => {
+            $("#divTextoRepuestos").fadeOut("slow", function () {
+                $(this).html("").show();
+            });
+        }, 5000);
+    }
+}
+
+
+// ✅ Utilidad para mostrar mensajes y ocultarlos después
+function mostrarMensaje(tipo, texto) {
+    $("#divTextoRepuestos").stop(true, true).html(
+        `<div class="callout callout-${tipo}">${texto}</div>`
+    ).show();
+
+    setTimeout(() => {
+        $("#divTextoRepuestos").fadeOut("slow", function () {
+            $(this).html("").show();
+        });
+    }, 5000);
+}
 
 function retornarIMItems2(data, opcion) {
 
@@ -693,7 +817,7 @@ function retornarIMItems2(data, opcion) {
             success: function (respuesta) {
                 var obj = JSON.parse(respuesta);
                 if (obj["im_items"].length > 0) {
-                    establecerValores(obj, 4);
+                    establecerValores(obj, 4);  // ← aquí se guarda respuestosCantidados Diego B 01-07-2025
                 } else {
                     retornarMensajeDeCreacion(2);
                 }
@@ -833,7 +957,7 @@ function retornarIMItems2(data, opcion) {
             success: function (respuesta) {
                 var obj = JSON.parse(respuesta);
                 if (obj.length > 0) {
-                    var nombres = ["cod_item", "cod_item","nom_item"];
+                    var nombres = ["cod_item", "cod_item", "nom_item"];
                     var nombreDataList = 'cod_item_1';
                     $("#DivDataListItems").html(retornarDataList(obj, nombres, nombreDataList));
                 }
@@ -844,6 +968,7 @@ function retornarIMItems2(data, opcion) {
         });
     }
 
+    //Ajustada para guardar el respuesto en im_items  14-07-2025
     if (opcion === 7) {
         var datosAEnviar = {
             'cod_item': $("#cod_item").val(),
@@ -860,7 +985,7 @@ function retornarIMItems2(data, opcion) {
                     retornarIMItems(obj, 17);
                     $("#alter_item").val(obj[0]["alter_item"]);
                     $("#nom_item").val(obj[0]["nom_item"]);
-                    
+
                     $("#divTextoRepuestos").removeClass('col-lg-12 disabled color-palette bg-danger');
                     $("#divFiltrosRepuestos2").removeClass('bg-danger');
                     $("#divFiltrosRepuestos1").removeClass('bg-danger');
@@ -870,17 +995,39 @@ function retornarIMItems2(data, opcion) {
                     $("#divTextoRepuestos").html('');
                     $("#repuesto_existe").val('1');
 
+                    // } else {
+                    //     $("#divProductosBorradores").html('');
+                    //     $("#divCantidadRepuestos").hide();
+                    //     $("#alter_item").val('');
+                    //     $("#nom_item").val('');
+                    //     //$("#divProductosIniciales").html('');
+                    //     $("#divFoto").html('');
+                    // }
+
+                    // Ajuste else para insertar nuevo item Diego B 14-07-2025
                 } else {
-                    $("#divProductosBorradores").html('');
-                    $("#divCantidadRepuestos").hide();
-                    $("#alter_item").val('');
-                    $("#nom_item").val('');
-                    //$("#divProductosIniciales").html('');
-                    $("#divFoto").html('');
+                    const alterVal = $("#alter_item").val().trim();
+
+                    if (alterVal !== "") {
+                        // Mostrar mensaje de creación
+                        $("#divTextoRepuestos").html(
+                            `<div class="callout callout-success">Insertando el repuesto <strong>${alterVal}</strong>. Por favor espera unos segundos…</div>`
+                        );
+
+                        // Esperar 500ms para que el navegador *sí lo pinte* visualmente antes del AJAX
+                        setTimeout(() => {
+                            consultarInsertarDesdeCpPreciosProvee(alterVal);
+                        }, 500);
+
+                        return;
+                    }
                 }
+
             },
-            error: function (jqXHR, textStatus, errorThrown) {
-                alert("Error function retornarIMItems2(datos, opcion=7) {...\nError from server, please call support");
+            error: function () {
+                $("#divTextoRepuestos").html(
+                    `<div class="callout callout-danger"> Error de conexión con el servidor. Contacte a soporte.</div>`
+                );
             }
         });
     }
@@ -898,7 +1045,7 @@ function retornarIMItems2(data, opcion) {
             success: function (respuesta) {
                 var obj = JSON.parse(respuesta);
                 if (obj.length > 0) {
-                    var nombres = ["alter_item", "alter_item","nom_item"];
+                    var nombres = ["alter_item", "alter_item", "nom_item"];
                     var nombreDataList = 'alter_item_1';
                     $("#DivDataListItemsDos").html(retornarDataList(obj, nombres, nombreDataList));
                 }
@@ -1003,8 +1150,6 @@ function retornarIMItems2(data, opcion) {
             }
         });
     }
-
-
 }
 
 function cambiarIMItems(data, opcion) {

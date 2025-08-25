@@ -321,6 +321,7 @@ $(document).ready(function () {
         }
     });
 
+    // Ajuste if para carga de boton enviar a compras Diego B 12-08-2025
     if ($.urlParam('id_requerim') === null) {
 
         Swal.fire({
@@ -342,8 +343,70 @@ $(document).ready(function () {
 
         id_requerim = $.urlParam('id_requerim');
         retornarVRRequerim($.urlParam('id_requerim'), 2);
+
+        // === Mejor validación: espera a que el estado esté cargado Diego B 12-08-2025===
+        var intento = 0;
+        var maxIntentos = 20; // Máximo 2 segundos (20 intentos x 100ms)
+
+        function validarYMostrarBoton() {
+            intento++;
+            var estado = $("#estadoRequerimiento").val();
+            var estadosValidos = ['82'];
+
+            console.log(`Intento ${intento}: Estado =`, estado);
+
+            if (estado && estado !== '-1' && estado !== '' && !isNaN(estado)) {
+                // El estado ya está cargado
+                if (estadosValidos.includes(estado) && hayItemsParaCompras()) {
+                    $("#solicitudACompras").show();
+                } else {
+                    $("#solicitudACompras").hide();
+                }
+
+                console.log("✅ Estado del requerimiento:", estado);
+                console.log("✅ ¿Hay items marcados para compras?:", hayItemsParaCompras());
+                console.log("✅ Botón 'solicitudACompras' visible:", $("#solicitudACompras").is(":visible"));
+                return; // Sale si ya está listo
+            }
+
+            // Si aún no está listo, sigue intentando
+            if (intento < maxIntentos) {
+                setTimeout(validarYMostrarBoton, 100);
+            } else {
+                console.log("⚠️ Advertencia: No se pudo cargar el estado del requerimiento.");
+                $("#solicitudACompras").hide();
+            }
+        }
+
+        // Iniciar validación después de que la tabla esté cargada
+        $(document).off('tablaCargada').on('tablaCargada', function () {
+            setTimeout(validarYMostrarBoton, 100);
+        });
     }
+    // === Actualizar botón si el usuario marca/desmarca un checkbox ===
+    $(document).on('change', 'input[id^="cr_"]', function () {
+        setTimeout(function () {
+            var estado = $("#estadoRequerimiento").val();
+            var estadosValidos = ['82'];
+
+            if (estadosValidos.includes(estado) && hayItemsParaCompras()) {
+                $("#solicitudACompras").show();
+            } else {
+                $("#solicitudACompras").hide();
+            }
+        }, 100);
+    });
 });
+
+//nuevo ajuste cargar a compras items nuevos Diego B 12-08
+function hayItemsParaCompras() {
+    var hay = false;
+    $('input[id^="cr_"]:checked').each(function () {
+        hay = true;
+        return false; // Sale al encontrar el primero
+    });
+    return hay;
+}
 
 function actualizarRequerimiento() {
 

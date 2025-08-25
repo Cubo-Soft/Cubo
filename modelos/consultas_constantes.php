@@ -67,3 +67,4 @@ define("GRUPONITS3", "SELECT nm_juridicas.numid,nm_juridicas.razon_social,nm_suc
 define("AMALERTAS1","select am_alertas.id_alerta,am_alertas.id_tipoalerta,am_alertas.id_proceso,am_alertas.fecha_ini,ap_tipoalerta.descrip_alert from am_alertas,ap_tipoalerta where am_alertas.id_tipoalerta=ap_tipoalerta.id_tipoalerta and am_alertas.id_estado=58 ");
 define("AMUSUARIOS1","SELECT * FROM am_usuarios ");
 define("IM_ITEMS2","SELECT * FROM im_items ");
+define("NMPERSONAS1","SELECT nm_personas.* FROM nm_personas, nm_nits WHERE nm_personas.numid=nm_nits.numid ");
