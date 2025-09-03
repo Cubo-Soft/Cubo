@@ -42,6 +42,7 @@ function retornarIMItems(data, opcion) {
                 data: { 'caso': '1', 'datosAEnviar': datosAEnviar },
                 type: "POST",
                 success: function (respuesta) {
+					//console.log("im_items.js: "+respuesta);
                     var obj = JSON.parse(respuesta);
 
                     $("#mensajesParametrosIniciales").html('');
@@ -1230,7 +1231,7 @@ function crearIMItems(data, opcion) {
         datosAEnviar.unidad = $("#ip_unidades").val();
         datosAEnviar.grup_item = $("#ip_grupos").val();
         datosAEnviar.numid = $("#numid").val();
-        datosAEnviar.numid = $("#id_proveedor").val();
+        //datosAEnviar.numid = $("#id_proveedor").val();  // está  pisando el numid  2025-07-27{rmg}
         datosAEnviar.id_marca = $("#ip_marcas").val();
         datosAEnviar.unid_desgaste = $("#unid_desgaste").val();
         datosAEnviar.cant_desgaste = $("#cant_desgaste").val();
@@ -1258,6 +1259,7 @@ function crearIMItems(data, opcion) {
             data: { 'caso': '22', 'datosAEnviar': datosAEnviar },
             type: "POST",
             success: function (respuesta) {
+				//console.log("im_items.js li:1117: "+respuesta);
                 var obj = JSON.parse(respuesta);
                 if (obj === "0") {
                     $("#mensajesUsuario").html('<div class="alert alert-success">Creación correcta. Por favor ingrese la fotografía del elemento</div>');

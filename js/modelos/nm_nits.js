@@ -226,15 +226,18 @@ function retornarNMNits(data, opcion) {
             data: { 'caso': '9', 'datosAEnviar': datosAEnviar },
             type: "POST",
             success: function (respuesta) {
+				//console.log("nm_nits.js li229: "+respuesta);
                 var obj = JSON.parse(respuesta);
                 if (obj["nm_juridicas"].length > 0) {
                     //persona juridica
                     $("#numid").val(obj["nm_juridicas"][0]["numid"]);
+					$("#id_proveedor").val(obj["nm_juridicas"][0]["id_sucursal"]);
                     $("#mensajesUsuario").html('');
                     retornarNMJuridicas(null, 11);
                 } else {
                     //persona natural
                     $("#numid").val(obj["nm_personas"][0]["numid"]);
+					$("#id_proveedor").val(obj["nm_personas"][0]["id_sucursal"]);
                     $("#mensajesUsuario").html('');
                     retornarNMPersonas(null, 6);
                 }
@@ -245,7 +248,30 @@ function retornarNMNits(data, opcion) {
         });
     }
 
+    if (opcion === 10) {
+        var datosAEnviar = {
+            'nombre_persona': $("#nombre_persona").val()
+        };
 
+        $.ajax({
+            url: "../controladores/CT_nm_nits.php",
+            data: { 'caso': '10', 'datosAEnviar': datosAEnviar },
+            type: "POST",
+            success: function (respuesta) {
+                var obj = JSON.parse(respuesta);
+                if (obj.length > 0) {
+                    var nombres = ["id_sucursal","nombre_persona","numid"];
+                    var nombreDataList = 'nombre_persona_1';
+                    $("#DivDataListNombrePersona").html(retornarDataList(obj, nombres, nombreDataList));
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                alert("Error function retornarNMNits(datos, opcion=10) {...\nError from server, please call support");
+            }
+        });
+    }
+	
+	
 }
 
 function crearNMNits(data, opcion) {

@@ -66,7 +66,21 @@ class CL_nm_nits
                 $this->sentencia = "SELECT id_contacto FROM nm_contactos WHERE cc_contacto = '" . $datos["cc_contacto"] . "' ORDER BY id_contacto DESC LIMIT 1;";
             }
 
-            //echo $this->sentencia; exit();
+ 
+            if ($opcion === 10) {
+                $this->sentencia = "SELECT nm_sucursal.id_sucursal,nm_sucursal.numid, CASE "
+                    . "WHEN nm_personas.apelli_nom IS NOT NULL THEN nm_personas.apelli_nom "
+                    . "ELSE nm_juridicas.razon_social "
+                    . "END AS nombre_persona,nm_nits.numid "
+                    . "FROM nm_sucursal, nm_nits "
+                    . "LEFT JOIN nm_personas ON nm_personas.numid=nm_nits.numid "
+                    . "LEFT JOIN nm_juridicas ON nm_juridicas.numid=nm_nits.numid "
+                    . "WHERE ( nm_personas.apelli_nom LIKE '%" . $datos["nombre_persona"] . "%' OR nm_juridicas.razon_social LIKE '%" . $datos["nombre_persona"] . "%' ) "
+                    . "AND nm_sucursal.numid = nm_nits.numid ";
+            }
+
+
+			//echo $this->sentencia; exit();
 
             $OB_CL_Base = new CL_Base();
             return $OB_CL_Base->leer($this->sentencia);

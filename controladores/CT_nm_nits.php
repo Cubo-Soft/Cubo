@@ -8,6 +8,7 @@ $OB_nm_nits = new CL_nm_nits();
 $OB_nm_personas = new CL_nm_personas();
 $OB_nm_juridicas = new CL_nm_juridicas();
 
+$_POST = $_REQUEST;
 /*
  * proviene de nm_nits.js 
  * caso 1 
@@ -129,4 +130,10 @@ if($_POST["caso"]==='9'){
     $retorno["nm_juridicas"]=$OB_nm_juridicas->leer($datos,4);
 
     echo json_encode($retorno);
+	
+}
+
+if($_POST["caso"]==='10'){
+    $datos["nombre_persona"] = $_POST["datosAEnviar"]["nombre_persona"];
+    echo json_encode($OB_nm_nits->leer($datos, 10));
 }

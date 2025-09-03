@@ -81,8 +81,9 @@ $(function () {
             //persona juridica
             $("#mensajesUsuario").html('');
             retornarNMJuridicas(null, 10);
-        }*/
-        retornarNMNits(null,7);
+        }
+        retornarNMNits(null,7); */
+        retornarNMNits(null,10);
     });
 
     $("#nombre_persona").on("blur", function () {
