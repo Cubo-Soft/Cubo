@@ -54,6 +54,7 @@ function retornarIPGrupos(data, opcion) {
             data: { 'caso': '3' },
             type: "POST",
             success: function (respuesta) {
+				//console.log("ip_grupos.js: "+respuesta);
                 var obj = JSON.parse(respuesta);
 
                 var datos = {
@@ -63,7 +64,8 @@ function retornarIPGrupos(data, opcion) {
 
                 var datosDeLista = {
                     'valor': 'cod_grupo',
-                    'texto': 'nom_grupo'
+                    'texto': 'nom_grupo',
+                    'subdi': 'subdivide'
                 };
                 $("#" + data["nombreDiv"]).html(crearSelect(datos, obj, datosDeLista, opcionSeleccionada));
             },

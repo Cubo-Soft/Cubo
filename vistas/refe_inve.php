@@ -138,8 +138,8 @@ if (!isset($_SESSION["estado"])) {
                             </div>   
                             <div class="col-lg-12">
                                 <div class="col-lg-2">
-                                    <label>Unidad desgaste</label>
-                                    <input type="number" id="unid_desgaste" name="unid_desgaste" class="form form-control" onkeyup="javascript:this.value = this.value.toUpperCase();" placeholder="Unidad desgaste" />
+                                    <label>Unidad desgaste</label>  <!-- cambio el type porque debe tomar de ip_unidades Varchar {rmg} 20250714 -->
+                                    <input type="text" id="unid_desgaste" name="unid_desgaste" class="form form-control" onkeyup="javascript:this.value = this.value.toUpperCase();" placeholder="Unidad desgaste" />
                                 </div>
                                 <div class="col-lg-2">
                                     <label>Cantidad desgaste</label>

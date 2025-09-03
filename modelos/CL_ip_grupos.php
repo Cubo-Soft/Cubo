@@ -49,7 +49,16 @@ class CL_ip_grupos {
                 . "GROUP BY ip_grupos.cod_grupo "
                 ."ORDER BY ip_grupos.nom_grupo ";
             }
-           
+
+            if($opcion===6){
+                $this->sentencia = "SELECT ip_grupos.cod_grupo,UPPER(ip_grupos.nom_grupo) as nom_grupo, "
+                . "subdivide FROM ip_grupos ";
+                //. "WHERE ip_grupos.cod_grupo LIKE '02%' "
+                //. "AND ip_grupos.subdivide='N' "
+                //. "GROUP BY ip_grupos.cod_grupo "
+                //."ORDER BY ip_grupos.nom_grupo ";
+            }      
+			
             $OB_CL_Base = new CL_Base();
             return $OB_CL_Base->leer($this->sentencia);
         } catch (PDOException $exc) {

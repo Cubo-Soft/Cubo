@@ -298,7 +298,7 @@ class CL_im_items
                 $this->sentencia = IM_ITEMS2
                     . "WHERE im_items.alter_item LIKE '%" . $datos["alter_item"] . "%' "
                     . "AND im_items.grup_item LIKE '" . $datos["grup_item"] . "%' ";
-                //. "AND linea='" . $datos["linea"] . "';";
+					//. "AND linea='" . $datos["linea"] . "';";
             }
 
             if ($opcion === 23) {
@@ -326,34 +326,34 @@ class CL_im_items
             }
 
             if ($opcion === 27) {
-    $this->sentencia = "SELECT 
-        i.cod_item,
-        i.alter_item,
-        i.nom_item,
-        i.unidad,
-        i.grup_item,
-        i.id_marca,
-        i.tipo_item,
-        i.modelo,
-        i.dimensiones,
-        i.precio_vta,
-        i.precio_vta_usd,
-        COALESCE(i.foto, '../img_inve/sin_imagen.jpg') AS foto,
-        i.minimo,
-        i.maximo,
-        COALESCE(s.saldo, 0) AS saldo,
-        CONCAT('Grupo ', i.grup_item) AS nom_grupo,
-        CASE 
-            WHEN i.id_marca > 0 THEN CONCAT('Marca ID:', i.id_marca) 
-            ELSE 'Marca N/A' 
-        END AS nom_marca,
-        'Sin descripción' AS descrip,
-        'N/A' AS descrip_modelo,
-        'N/A' AS nom_dimen
-    FROM im_items i
-    LEFT JOIN ir_salinve s ON i.cod_item = s.cod_item AND s.codbodeg = 1
-    WHERE i.cod_item = '" . $datos["cod_item"] . "'";
-}
+				$this->sentencia = "SELECT 
+					i.cod_item,
+					i.alter_item,
+					i.nom_item,
+					i.unidad,
+					i.grup_item,
+					i.id_marca,
+					i.tipo_item,
+					i.modelo,
+					i.dimensiones,
+					i.precio_vta,
+					i.precio_vta_usd,
+					COALESCE(i.foto, '../img_inve/sin_imagen.jpg') AS foto,
+					i.minimo,
+					i.maximo,
+					COALESCE(s.saldo, 0) AS saldo,
+					CONCAT('Grupo ', i.grup_item) AS nom_grupo,
+					CASE 
+						WHEN i.id_marca > 0 THEN CONCAT('Marca ID:', i.id_marca) 
+						ELSE 'Marca N/A' 
+					END AS nom_marca,
+					'Sin descripción' AS descrip,
+					'N/A' AS descrip_modelo,
+					'N/A' AS nom_dimen
+				FROM im_items i
+				LEFT JOIN ir_salinve s ON i.cod_item = s.cod_item AND s.codbodeg = 1
+				WHERE i.cod_item = '" . $datos["cod_item"] . "'";
+			}
 
             
             // if ($opcion === 27) {
@@ -381,40 +381,40 @@ class CL_im_items
         try {
             if ($opcion === 1) {
                 $this->sentencia = "INSERT INTO im_items (
-        cod_item, alter_item, nom_item, unidad, grup_item,
-        id_proveedor, id_marca, unid_desgaste, cant_desgaste, facturable,
-        area_item, articulo, tipo_item, num_parte, estado_item,
-        iva, precio_vta, modelo, linea, peso,
-        volumen, dimensiones, precio_vta_usd, minimo, maximo,
-        foto
-    ) VALUES (
-        '" . addslashes($datos["cod_item"]) . "',
-        '" . addslashes($datos["alter_item"]) . "',
-        '" . addslashes($datos["nom_item"]) . "',
-        '" . addslashes($datos["unidad"]) . "',
-        '" . addslashes($datos["grup_item"]) . "',
-        " . (int) $datos["id_proveedor"] . ",
-        " . (int) $datos["id_marca"] . ",
-        '" . addslashes($datos["unid_desgaste"]) . "',
-        " . (float) $datos["cant_desgaste"] . ",
-        " . (int) $datos["facturable"] . ",
-        " . (int) $datos["area_item"] . ",
-        '" . addslashes($datos["articulo"]) . "',
-        '" . addslashes($datos["tipo_item"]) . "',
-        '" . addslashes($datos["num_parte"]) . "',
-        " . (int) $datos["estado_item"] . ",
-        " . (float) $datos["iva"] . ",
-        " . (float) $datos["precio_vta"] . ",
-        '" . addslashes($datos["modelo"]) . "',
-        " . (int) $datos["linea"] . ",
-        '" . addslashes($datos["peso"]) . "',
-        '" . addslashes($datos["volumen"]) . "',
-        '" . addslashes($datos["dimensiones"]) . "',
-        " . (float) $datos["precio_vta_usd"] . ",
-        " . (int) $datos["minimo"] . ",
-        " . (int) $datos["maximo"] . ",
-        '" . addslashes($datos["foto"]) . "'
-    );";
+					cod_item, alter_item, nom_item, unidad, grup_item,
+					id_proveedor, id_marca, unid_desgaste, cant_desgaste, facturable,
+					area_item, articulo, tipo_item, num_parte, estado_item,
+					iva, precio_vta, modelo, linea, peso,
+					volumen, dimensiones, precio_vta_usd, minimo, maximo,
+					foto
+				) VALUES (
+					'" . addslashes($datos["cod_item"]) . "',
+					'" . addslashes($datos["alter_item"]) . "',
+					'" . addslashes($datos["nom_item"]) . "',
+					'" . addslashes($datos["unidad"]) . "',
+					'" . addslashes($datos["grup_item"]) . "',
+					" . (int) $datos["id_proveedor"] . ",
+					" . (int) $datos["id_marca"] . ",
+					'" . addslashes($datos["unid_desgaste"]) . "',
+					" . (float) $datos["cant_desgaste"] . ",
+					" . (int) $datos["facturable"] . ",
+					" . (int) $datos["area_item"] . ",
+					'" . addslashes($datos["articulo"]) . "',
+					'" . addslashes($datos["tipo_item"]) . "',
+					'" . addslashes($datos["num_parte"]) . "',
+					" . (int) $datos["estado_item"] . ",
+					" . (float) $datos["iva"] . ",
+					" . (float) $datos["precio_vta"] . ",
+					'" . addslashes($datos["modelo"]) . "',
+					" . (int) $datos["linea"] . ",
+					'" . addslashes($datos["peso"]) . "',
+					'" . addslashes($datos["volumen"]) . "',
+					'" . addslashes($datos["dimensiones"]) . "',
+					" . (float) $datos["precio_vta_usd"] . ",
+					" . (int) $datos["minimo"] . ",
+					" . (int) $datos["maximo"] . ",
+					'" . addslashes($datos["foto"]) . "'
+				);";
             }
             //echo $this->sentencia; exit();
             $OB_CL_Base = new CL_Base();

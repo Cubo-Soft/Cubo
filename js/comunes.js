@@ -152,6 +152,7 @@ $(document).ready(function () {
     });
 
 });
+
 function starMap() {
 
     map = L.map('map').setView([4.6449260960446, -74.07018363475801], 6);
@@ -165,8 +166,6 @@ function starMap() {
         document.getElementById("suc_lng_gps").value = lng;
     });
 }
-
-
 
 function codeAddress() {
     var direccion = document.getElementById("direccion").value;
@@ -254,13 +253,15 @@ function crearSelect(datos, lista, datosDeLista, opcionSeleccionada) {
     }
 
     for (var i = 0; i < lista.length; i++) {
-
-        if (opcionSeleccionada === lista[i][datosDeLista["valor"]]) {
-            retornar += "<option value='" + lista[i][datosDeLista["valor"]] + "' selected>" + lista[i][datosDeLista["texto"]] + "</option>";
-        } else {
-            retornar += "<option value='" + lista[i][datosDeLista["valor"]] + "'>" + lista[i][datosDeLista["texto"]] + "</option>";
-        }
-
+        if( lista[i][datosDeLista["subdi"]] === "S"){   // adición if 20250725 {rmg}
+            retornar += "<optgroup label='== "+lista[i][datosDeLista["texto"]]+" ==' ></optgroup>";
+        }else{
+			if (opcionSeleccionada === lista[i][datosDeLista["valor"]]) {
+				retornar += "<option value='" + lista[i][datosDeLista["valor"]] + "' selected>" + lista[i][datosDeLista["texto"]] + "</option>";
+			} else {
+				retornar += "<option value='" + lista[i][datosDeLista["valor"]] + "'>" + lista[i][datosDeLista["texto"]] + "</option>";
+			}
+		}
     }
     retornar += "</select>";
     return retornar;
@@ -412,8 +413,9 @@ function retornarDataList(obj, nombres, nombreDataList) {
     $("#" + nombreDataList).empty();
     var datalist = "<datalist id='" + nombreDataList + "'>";
     for (var i = 0, max = obj.length; i < max; i++) {
-        datalist += "<option value='" + obj[i][nombres[1]] + "'>";
-        if (nombres.length == 3) {
+        datalist += "<option value='" + obj[i][nombres[1]] + "'>"+obj[i][nombres[0]];  // adición nombres[1] 20250725 {rmg}
+
+        if (nombres.length === 3){  // adición de un = 20250725 {rmg}
             datalist += "( " + obj[i][nombres[2]] + " ) </option>";
         }
     }
@@ -882,7 +884,7 @@ function validarCampos(opcion) {
             retorno += 1;
         }
 
-        if ($("#minimo").val() === '0') {
+        if ($("#minimo").val() < '0') {  // cambio == por < 20250725 {rmg}
             $("#minimo").focus();
             $("#mensajesUsuario").html('<div class="callout callout-danger">Por favor ingrese un valor minimo</div>');
         } else {
@@ -1606,13 +1608,12 @@ var saldo = data["vr_requerimdet"][i]["saldo"];
 if (saldo === null || saldo === undefined || isNaN(saldo)) {
     saldo = 0;
 }
-tabla += '<td><center><strong>' + saldo + '</strong></center></td>';
+					tabla += '<td><center><strong>' + saldo + '</strong></center></td>';
 
                     //permiso de precio de venta
                     if (permisos.indexOf("P") !== -1) {
                         tabla += '<td>' + redondear(data["repuestosConSaldo"][i][0]["precio_vta"]) + '</td>';
                     }
-
 
                     tabla += '<td>' + data["vr_requerimdet"][i]["observs"] + '</td>';
 
